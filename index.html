@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IdeaGames</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💡</text></svg>">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 1. GLOBAL VARIABLES --- */
+        :root {
+            --bg-color: #fbf9f1;
+            --border-color: #000000;
+            --accent-yellow: #ffeb3b;
+            --accent-red: #ff4d4d;
+            --accent-blue: #2196f3;
+            --accent-green: #4caf50;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: black;
+            font-family: 'Space Mono', monospace;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- 2. HEADER & NAV --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 3px solid black;
+            background: white;
+        }
+        .logo {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: black;
+            background: var(--accent-red);
+            padding: 5px 10px;
+            border: 3px solid black;
+            box-shadow: 4px 4px 0px black;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+            margin-left: 20px;
+            text-transform: uppercase;
+        }
+        .nav-links a:hover { text-decoration: underline; }
+
+        /* --- 3. HERO SECTION (BIG TEXT) --- */
+        .hero {
+            text-align: center;
+            padding: 100px 20px;
+            position: relative;
+        }
+        
+        h1 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 6rem;
+            line-height: 0.9;
+            margin: 0;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* The Yellow Highlight Box */
+        .highlight {
+            background-color: var(--accent-yellow);
+            border: 3px solid black;
+            padding: 0 20px;
+            display: inline-block;
+            transform: rotate(-2deg); /* Slight tilt for "Stupid" vibe */
+        }
+
+        .hero-sub {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 30px auto;
+            line-height: 1.5;
+        }
+
+        /* --- 4. FLOATING BADGES (ANIMATION) --- */
+        .badge-float {
+            position: absolute;
+            font-family: 'Space Mono', monospace;
+            font-weight: bold;
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            border: 2px solid black;
+            text-transform: uppercase;
+            box-shadow: 3px 3px 0px black;
+            z-index: 1;
+        }
+        /* Define the floating dance */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        /* Badge Positions */
+        .b1 { top: 80px; left: 15%; background: var(--accent-red); animation: float 4s ease-in-out infinite; }
+        .b2 { top: 120px; right: 20%; background: var(--accent-blue); color: white; animation: float 5s ease-in-out infinite; animation-delay: 1s; }
+        .b3 { bottom: 40px; left: 25%; background: var(--accent-green); animation: float 3.5s ease-in-out infinite; animation-delay: 0.5s; }
+
+        /* --- 5. GAME GRID (RECTANGLES) --- */
+        .grid-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 50px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* Responsive Grid */
+            gap: 40px;
+        }
+
+        .game-card {
+            border: 3px solid black;
+            background: white;
+            padding: 20px;
+            box-shadow: 8px 8px 0px black; /* Hard Shadow */
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none; /* Link reset */
+            color: black;
+            position: relative;
+        }
+
+        .game-card:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0px black;
+        }
+        
+        /* The Thumbnail Box */
+        .card-thumb {
+            width: 100%;
+            height: 200px;
+            background-color: #eee;
+            border: 2px solid black;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            overflow: hidden;
+        }
+        /* Make images fit perfectly */
+        .card-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-title {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1.5rem;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 20px;
+            flex-grow: 1; /* Pushes the button to bottom */
+        }
+
+        .play-link {
+            font-weight: bold;
+            color: black;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .play-link span { color: var(--accent-blue); font-size: 1.2rem; }
+
+        /* NEW Badge on Card */
+        .card-badge {
+            position: absolute;
+            top: -15px;
+            right: -10px;
+            background: var(--accent-green);
+            border: 2px solid black;
+            padding: 5px 10px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            transform: rotate(5deg);
+        }
+
+        /* --- 6. FOOTER --- */
+        footer {
+            border-top: 3px solid black;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            margin-top: 50px;
+        }
+        .coffee-btn {
+            background: var(--accent-yellow);
+            border: 3px solid black;
+            padding: 15px 30px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: black;
+            box-shadow: 5px 5px 0px black;
+            display: inline-block;
+            transition: 0.2s;
+        }
+        .coffee-btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0px black; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 3.5rem; }
+            .badge-float { display: none; } /* Hide floating items on mobile to save space */
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#" class="logo">IdeaGames</a>
+        <div class="nav-links">
+            <a href="#">About</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="badge-float b1">WASTE TIME</div>
+        <div class="badge-float b2">LOL WHY</div>
+        <div class="badge-float b3">NO REFUNDS CAUSE YOU Don't PAY</div>
+
+        <h1>IDEA <br> <span class="highlight">GAMES</span></h1>
+        
+        <p class="hero-sub">
+            A collection of absurd, pointless, and hilariously dumb mini games 
+            that will make you question your life choices.
+        </p>
+    </div>
+
+    <div class="grid-container">
+
+        <a href="death-queue/index.html" class="game-card">
+            <div class="card-badge">NEW!</div>
+            <div class="card-thumb" style="background-color: #ffcccc;">📉</div> 
+            <h3 class="card-title">Layoff Simulator</h3>
+            <p class="card-desc">Drag employees to the trash. Watch the stock price go up. Experience true corporate synergy.</p>
+            <div class="play-link">Play Now <span>→</span></div>
+        </a>
+
+        <a href="apology-generator/index.html" class="game-card">
+            <div class="card-thumb" style="background-color: #ccedff;">🙏</div>
+            <h3 class="card-title">Apology Generator</h3>
+            <p class="card-desc">Generate meaningless corporate apologies for disasters you definitely caused.</p>
+            <div class="play-link">Play Now <span>→</span></div>
+        </a>
+
+        <a href="influencer-tycoon/index.html" class="game-card">
+          <div class="card-thumb">
+            <img src="influencer-tycoon/thumb.png" alt="Layoff Simulator Thumbnail">
+        </div>
+            <h3 class="card-title">Influencer Tycoon</h3>
+            <p class="card-desc">Buy bots. Start drama. Post cringe. The road to 1M followers starts here.</p>
+            <div class="play-link">Play Now <span>→</span></div>
+        </a>
+
+        <div class="game-card" style="opacity: 0.6; cursor: not-allowed;">
+            <div class="card-thumb">🔒</div>
+            <h3 class="card-title">Infinite Meeting</h3>
+            <p class="card-desc">Survive a Zoom call that never ends. Don't let your camera turn on.</p>
+            <div class="play-link">Coming Soon</div>
+        </div>
+
+    </div>
+
+    <footer>
+        <a href="#" class="coffee-btn">☕ Buy Me a Coffee</a>
+        <br><br>
+        <div>
+            <strong>@iamideaguy</strong> • Satirical Mini Games 🎮👾
+        </div>
+    </footer>
+
+</body>
+</html>

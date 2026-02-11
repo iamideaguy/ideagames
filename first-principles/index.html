@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Principles | IdeaGames</title>
+    <style>
+        /* --- UI DESIGN (Blueprint Style) --- */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        body { margin: 0; overflow: hidden; background: #0b0f19; font-family: 'Share Tech Mono', monospace; color: #aacfdd; }
+        
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
+
+        /* UI Overlay */
+        #ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; /* Let clicks pass through to 3D */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        /* Header */
+        header { border-bottom: 2px solid #aacfdd; padding-bottom: 10px; display: flex; justify-content: space-between; }
+        h1 { margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
+        .level-ind { font-size: 18px; color: #ffeb3b; }
+
+        /* Instructions */
+        #instruction-box {
+            text-align: center;
+            background: rgba(11, 15, 25, 0.8);
+            border: 1px solid #aacfdd;
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            pointer-events: auto;
+        }
+        #task-title { font-size: 32px; margin: 0 0 10px 0; color: #fff; }
+        #task-desc { font-size: 16px; color: #aacfdd; margin-bottom: 20px; }
+        
+        /* Slider Control (For interactions) */
+        #control-panel {
+            pointer-events: auto;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 50px auto;
+            text-align: center;
+            display: none; /* Hidden until game starts */
+        }
+        input[type=range] {
+            width: 100%;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+
+        /* Success/Fail Overlay */
+        #feedback-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 100;
+            display: none; /* Hidden by default */
+            pointer-events: auto;
+        }
+        #feedback-text { font-size: 48px; color: #32d74b; margin-bottom: 20px; }
+        button {
+            background: transparent; border: 2px solid #aacfdd; color: #aacfdd;
+            padding: 15px 40px; font-family: 'Share Tech Mono', monospace;
+            font-size: 20px; cursor: pointer; text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        button:hover { background: #aacfdd; color: #0b0f19; }
+
+        /* Debug Stats */
+        #data-readout { position: absolute; bottom: 20px; right: 20px; font-size: 12px; opacity: 0.7; text-align: right; }
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        <header>
+            <h1>First Principles</h1>
+            <div class="level-ind" id="level-display">LEVEL 01</div>
+        </header>
+
+        <div id="instruction-box">
+            <h2 id="task-title">INITIALIZATION</h2>
+            <p id="task-desc">Loading Simulation...</p>
+            <button onclick="startGame()">BEGIN SEQUENCE</button>
+        </div>
+
+        <div id="control-panel">
+            <label id="slider-label">ADJUST PARAMETER X</label>
+            <input type="range" id="main-slider" min="0" max="100" value="50">
+            <button id="submit-btn" onclick="checkWin()">EXECUTE</button>
+        </div>
+        
+        <div id="data-readout">
+            VECTOR ALIGNMENT: <span id="debug-val">0.00</span><br>
+            TOLERANCE: +/- 5.00
+        </div>
+    </div>
+
+    <div id="feedback-overlay">
+        <div id="feedback-text">OPTIMAL</div>
+        <button onclick="nextLevel()">PROCEED</button>
+    </div>
+
+    <script>
+        // --- 1. ENGINE SETUP ---
+        let scene, camera, renderer;
+        let activeLevel = 1;
+        let gameActive = false;
+        
+        // Scene Objects
+        let objects = {}; 
+        
+        // Init Three.js
+        function init3D() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0b0f19);
+            scene.fog = new THREE.Fog(0x0b0f19, 10, 50);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 8;
+            camera.position.y = 2;
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+            dirLight.position.set(5, 10, 7);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            // Grid Floor
+            const gridHelper = new THREE.GridHelper(50, 50, 0x1f293a, 0x1f293a);
+            scene.add(gridHelper);
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (activeLevel === 1) animateLevel1();
+            if (activeLevel === 2) animateLevel2();
+            renderer.render(scene, camera);
+        }
+
+        // --- 2. GAME LOGIC ---
+
+        function startGame() {
+            document.getElementById('instruction-box').style.display = 'none';
+            document.getElementById('control-panel').style.display = 'block';
+            loadLevel(1);
+        }
+
+        function loadLevel(lvl) {
+            activeLevel = lvl;
+            clearScene();
+            document.getElementById('feedback-overlay').style.display = 'none';
+            document.getElementById('level-display').innerText = "LEVEL 0" + lvl;
+            
+            // Reset Slider
+            const slider = document.getElementById('main-slider');
+            slider.value = 50;
+
+            if(lvl === 1) setupLevel1();
+            if(lvl === 2) setupLevel2();
+        }
+
+        function clearScene() {
+            // Remove old objects but keep lights/grid
+            for (const key in objects) {
+                scene.remove(objects[key]);
+            }
+            objects = {};
+        }
+
+        function nextLevel() {
+            if(activeLevel < 2) {
+                loadLevel(activeLevel + 1);
+            } else {
+                alert("Prototype Complete! More levels coming soon.");
+                location.reload();
+            }
+        }
+
+        function showWin() {
+            document.getElementById('feedback-overlay').style.display = 'flex';
+            document.getElementById('feedback-text').innerText = "OPTIMAL";
+            document.getElementById('feedback-text').style.color = "#32d74b";
+        }
+
+        function showFail() {
+            document.getElementById('feedback-text').innerText = "FAILURE";
+            document.getElementById('feedback-text').style.color = "#ff453a";
+            // Shake effect logic could go here
+            setTimeout(() => {
+                alert("Sub-optimal performance. Human interaction failed.");
+            }, 100);
+        }
+
+        // --- 3. LEVEL DESIGN ---
+
+        // === LEVEL 1: THE FIRST KISS ===
+        // Concept: Rotate head to 45 degrees to avoid nose collision.
+        
+        function setupLevel1() {
+            // Instructions
+            document.getElementById('task-title').innerText = "TASK: FIRST KISS";
+            document.getElementById('task-desc').innerText = "Adjust cranial rotation (Z-Axis) to avoid nasal collision. Optimal angle: 45°.";
+            document.getElementById('instruction-box').style.display = 'block';
+            document.querySelector('#instruction-box button').style.display = 'none'; // Hide start button
+            
+            // 3D Objects
+            const headGeo = new THREE.SphereGeometry(1.5, 32, 32);
+            const noseGeo = new THREE.ConeGeometry(0.3, 1, 32);
+            const matPlayer = new THREE.MeshStandardMaterial({ color: 0x32d74b }); // Green
+            const matTarget = new THREE.MeshStandardMaterial({ color: 0xff453a }); // Red
+
+            // Player Head
+            objects.pHead = new THREE.Mesh(headGeo, matPlayer);
+            objects.pHead.position.set(-2, 2, 0);
+            
+            const pNose = new THREE.Mesh(noseGeo, matPlayer);
+            pNose.rotation.z = -Math.PI / 2; // Point right
+            pNose.position.x = 1.5;
+            objects.pHead.add(pNose);
+            
+            scene.add(objects.pHead);
+
+            // Target Head (The Date)
+            objects.tHead = new THREE.Mesh(headGeo, matTarget);
+            objects.tHead.position.set(2, 2, 0);
+            
+            const tNose = new THREE.Mesh(noseGeo, matTarget);
+            tNose.rotation.z = Math.PI / 2; // Point left
+            tNose.position.x = -1.5;
+            objects.tHead.add(tNose);
+
+            scene.add(objects.tHead);
+        }
+
+        function animateLevel1() {
+            if(!objects.pHead) return;
+
+            // Get Slider Value (0 to 100)
+            const val = document.getElementById('main-slider').value;
+            
+            // Map 0-100 to -90deg to +90deg
+            // We want 45 degrees to be the target.
+            // 45 degrees = 0.785 radians
+            
+            const rotation = (val - 50) * 0.05; // Scaling factor
+            objects.pHead.rotation.y = -rotation; // Rotate head Y axis (shake head no)
+            objects.tHead.rotation.y = rotation;  // Target mirrors you
+
+            // Debug Text
+            const degrees = Math.round(rotation * (180/Math.PI));
+            document.getElementById('debug-val').innerText = degrees + "°";
+        }
+
+        // Check Win for Level 1
+        function checkWin() {
+            const val = document.getElementById('main-slider').value;
+            // Target is roughly 45 degrees (val ~ 65 or 35)
+            // Let's say target is +/- 45 degrees.
+            
+            if (val > 60 && val < 75) {
+                showWin();
+            } else if (val < 40 && val > 25) {
+                showWin();
+            } else {
+                // Collision!
+                showFail();
+            }
+        }
+
+
+        // === LEVEL 2: THE HANDSHAKE ===
+        // Concept: Align height for a firm handshake.
+        
+        function setupLevel2() {
+            document.getElementById('task-title').innerText = "TASK: THE GREETING";
+            document.getElementById('task-desc').innerText = "Align vertical manipulator (Hand) to intersect target vector. Do not display weakness.";
+            document.getElementById('slider-label').innerText = "VERTICAL OFFSET";
+            document.getElementById('instruction-box').style.display = 'block';
+
+            // Arm Geometry
+            const armGeo = new THREE.BoxGeometry(4, 0.5, 0.5);
+            const handGeo = new THREE.BoxGeometry(1, 1.5, 0.2);
+            
+            const matPlayer = new THREE.MeshStandardMaterial({ color: 0x32d74b });
+            const matTarget = new THREE.MeshStandardMaterial({ color: 0xff453a });
+
+            // Player Arm
+            objects.pArm = new THREE.Group();
+            const pLimb = new THREE.Mesh(armGeo, matPlayer);
+            pLimb.position.x = -2;
+            const pHand = new THREE.Mesh(handGeo, matPlayer);
+            pHand.rotation.y = Math.PI / 2; // Flat hand
+            pHand.position.x = 0;
+            objects.pArm.add(pLimb);
+            objects.pArm.add(pHand);
+            objects.pArm.position.set(-3, 2, 0);
+            scene.add(objects.pArm);
+
+            // Target Arm
+            objects.tArm = new THREE.Group();
+            const tLimb = new THREE.Mesh(armGeo, matTarget);
+            tLimb.position.x = 2;
+            const tHand = new THREE.Mesh(handGeo, matTarget);
+            tHand.rotation.y = Math.PI / 2;
+            tHand.position.x = 0;
+            objects.tArm.add(tLimb);
+            objects.tArm.add(tHand);
+            objects.tArm.position.set(3, 2, 0); // Target is static at height 2
+            scene.add(objects.tArm);
+        }
+
+        function animateLevel2() {
+            if(!objects.pArm) return;
+            
+            const val = document.getElementById('main-slider').value;
+            // Map 0-100 to Height 0 to 4
+            const height = (val / 25); 
+            objects.pArm.position.y = height;
+            
+            document.getElementById('debug-val').innerText = "Y: " + height.toFixed(2);
+        }
+
+        function checkLevel2Win() {
+            const val = document.getElementById('main-slider').value;
+            // Target height is 2.0. Slider 50 = 2.0.
+            if (val > 45 && val < 55) {
+                showWin();
+            } else {
+                showFail();
+            }
+        }
+
+        // Global Check Win Router
+        window.checkWin = function() {
+            if (activeLevel === 1) checkLevel1Win(); // Fixed function name
+            if (activeLevel === 2) checkLevel2Win();
+        }
+
+        // Fix Level 1 function name mapping
+        function checkLevel1Win() {
+            const val = document.getElementById('main-slider').value;
+            if (val > 60 && val < 75) showWin();
+            else if (val < 40 && val > 25) showWin();
+            else showFail();
+        }
+
+        // Resize Handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Start
+        init3D();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Texting in Traffic | IdeaGames</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- 1. GLOBAL & RESET --- */
+        body { margin: 0; background-color: #f2f4f6; font-family: 'Inter', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* --- 2. HEADER (Global) --- */
+        #site-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: #f2f4f6; flex-shrink: 0; }
+        .brand-logo { background-color: #ff4d4d; color: black; font-weight: 800; text-transform: uppercase; text-decoration: none; padding: 6px 10px; border: 3px solid black; box-shadow: 4px 4px 0px black; font-size: 0.9rem; }
+        .stats-bar { display: flex; gap: 20px; font-weight: 600; font-size: 14px; color: #555; align-items: center; }
+        .stat-val { color: #111; font-weight: 800; }
+
+        /* --- 3. APP CONTAINER (Phone) --- */
+        #app-wrapper { flex-grow: 1; display: flex; justify-content: center; padding: 10px; padding-bottom: 20px; }
+        #phone-container { width: 100%; max-width: 450px; background: white; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; border: 8px solid #111; position: relative; }
+
+        /* --- 4. CHAT HEADER & TRAFFIC LIGHT --- */
+        #chat-header { padding: 15px; background: rgba(245,245,245,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        
+        .avatar-area { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #ddd; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .contact-info h3 { margin: 0; font-size: 15px; }
+        .contact-info p { margin: 0; font-size: 11px; color: #888; }
+
+        /* Traffic Light Widget */
+        .traffic-light { background: #111; padding: 8px; border-radius: 20px; display: flex; gap: 6px; align-items: center; }
+        .light { width: 12px; height: 12px; border-radius: 50%; opacity: 0.3; transition: opacity 0.2s, box-shadow 0.2s; }
+        .light.red { background-color: #ff453a; }
+        .light.yellow { background-color: #ffd60a; }
+        .light.green { background-color: #32d74b; }
+        
+        /* Active States (Glow) */
+        .active { opacity: 1 !important; transform: scale(1.1); }
+        .active.red { box-shadow: 0 0 10px #ff453a; }
+        .active.yellow { box-shadow: 0 0 10px #ffd60a; }
+        .active.green { box-shadow: 0 0 10px #32d74b; }
+        
+        .timer-text { color: white; font-family: monospace; font-size: 12px; margin-left: 5px; font-weight: bold; width: 25px; text-align: right; }
+
+        /* --- 5. CHAT AREA --- */
+        #chat-area { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: white; }
+        
+        .message { max-width: 80%; padding: 10px 16px; border-radius: 20px; font-size: 15px; line-height: 1.4; position: relative; animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .received { align-self: flex-start; background: #e9e9eb; color: black; border-bottom-left-radius: 4px; }
+        .sent { align-self: flex-end; background: #007aff; color: white; border-bottom-right-radius: 4px; }
+        
+        .typing-indicator { align-self: flex-start; background: #e9e9eb; padding: 12px 16px; border-radius: 20px; border-bottom-left-radius: 4px; display: none; }
+        .dots { display: flex; gap: 4px; }
+        .dot { width: 6px; height: 6px; background: #aaa; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+        /* --- 6. INPUT AREA --- */
+        #input-area { padding: 15px; background: #f9f9f9; border-top: 1px solid #ddd; display: flex; gap: 10px; align-items: center; }
+        
+        input { flex-grow: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; font-size: 16px; font-family: 'Inter', sans-serif; outline: none; }
+        input:disabled { background: #eee; cursor: not-allowed; }
+        
+        button { background: #007aff; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: transform 0.1s; }
+        button:active { transform: scale(0.9); }
+        button:disabled { background: #b4b4b4; cursor: default; }
+
+        /* --- 7. OVERLAY (Win/Start) --- */
+        #overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; text-align: center; }
+        .hidden { display: none !important; }
+        .play-btn { width: auto; height: auto; padding: 15px 40px; border-radius: 50px; font-weight: bold; font-size: 18px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <header id="site-header">
+        <a href="../index.html" class="brand-logo">IdeaGames</a>
+        <div class="stats-bar">
+            <span>GOAL: <span class="stat-val" style="color:#007aff">10 MSGS</span></span>
+            <span>TIME: <span id="game-timer" class="stat-val">0.0s</span></span>
+        </div>
+    </header>
+
+    <div id="app-wrapper">
+        <div id="phone-container">
+            
+            <div id="chat-header">
+                <div class="avatar-area">
+                    <div class="avatar">👮‍♂️</div>
+                    <div class="contact-info">
+                        <h3>Traffic Cop</h3>
+                        <p id="status-text">Active Now</p>
+                    </div>
+                </div>
+                <div class="traffic-light">
+                    <div id="light-red" class="light red"></div>
+                    <div id="light-yellow" class="light yellow"></div>
+                    <div id="light-green" class="light green active"></div>
+                    <div id="light-timer" class="timer-text">10</div>
+                </div>
+            </div>
+
+            <div id="chat-area">
+                <div class="message received">I'm watching you. Only text when the light is green. 🚦</div>
+                <div class="typing-indicator" id="typing-bubble">
+                    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                </div>
+            </div>
+
+            <div id="input-area">
+                <input type="text" id="msg-input" placeholder="iMessage" autocomplete="off">
+                <button id="send-btn" onclick="sendMessage()">↑</button>
+            </div>
+
+            <div id="overlay">
+                <h1 style="font-size: 2rem; margin-bottom: 10px;">Texting in Traffic</h1>
+                <p style="color: #ccc; max-width: 250px; line-height: 1.5;">Send 10 messages before the cop catches you. Only type on Green.</p>
+                <button class="play-btn" onclick="startGame()">Start Driving</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- GAME CONFIG ---
+        const GOAL = 10;
+        let messagesSent = 0;
+        let gameTime = 0.0;
+        let gameActive = false;
+        let trafficState = 'green'; // green, yellow, red
+        let cycleTimer = null; // The traffic light countdown
+        let gameInterval = null; // The stopwatch
+
+        // DOM Elements
+        const input = document.getElementById('msg-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatArea = document.getElementById('chat-area');
+        const timerDisplay = document.getElementById('game-timer');
+        const statusText = document.getElementById('status-text');
+        const typingBubble = document.getElementById('typing-bubble');
+
+        // Lights
+        const lRed = document.getElementById('light-red');
+        const lYellow = document.getElementById('light-yellow');
+        const lGreen = document.getElementById('light-green');
+        const lTimer = document.getElementById('light-timer');
+
+        // --- GAME LOOP ---
+
+        function startGame() {
+            document.getElementById('overlay').classList.add('hidden');
+            resetGame();
+        }
+
+        function resetGame() {
+            messagesSent = 0;
+            gameTime = 0.0;
+            gameActive = true;
+            
+            // Start Stopwatch
+            if (gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(() => {
+                if(gameActive) {
+                    gameTime += 0.1;
+                    timerDisplay.innerText = gameTime.toFixed(1) + "s";
+                }
+            }, 100);
+
+            // Start Traffic Cycle
+            setGreenLight();
+            input.focus();
+        }
+
+        // --- TRAFFIC LIGHT STATE MACHINE ---
+
+        function setGreenLight() {
+            trafficState = 'green';
+            updateLights('green');
+            enableInput(true);
+            statusText.innerText = "Active Now";
+            startCountdown(10, () => setYellowLight());
+        }
+
+        function setYellowLight() {
+            trafficState = 'yellow';
+            updateLights('yellow');
+            statusText.innerText = "Hurry up!";
+            startCountdown(3, () => setRedLight());
+        }
+
+        function setRedLight() {
+            trafficState = 'red';
+            updateLights('red');
+            enableInput(false);
+            statusText.innerText = "Watching...";
+            
+            // Cop Simulation
+            setTimeout(() => showTyping(true), 1500);
+            setTimeout(() => {
+                showTyping(false);
+                if(gameActive) receiveMessage(getRandomReply());
+            }, 4000);
+
+            startCountdown(8, () => setGreenLight());
+        }
+
+        // Helper to switch CSS classes
+        function updateLights(color) {
+            lRed.classList.remove('active');
+            lYellow.classList.remove('active');
+            lGreen.classList.remove('active');
+            
+            if(color === 'red') lRed.classList.add('active');
+            if(color === 'yellow') lYellow.classList.add('active');
+            if(color === 'green') lGreen.classList.add('active');
+        }
+
+        // Helper for the widget countdown
+        function startCountdown(seconds, callback) {
+            if (cycleTimer) clearInterval(cycleTimer);
+            let left = seconds;
+            lTimer.innerText = left;
+            
+            cycleTimer = setInterval(() => {
+                left--;
+                lTimer.innerText = left;
+                if (left <= 0) {
+                    clearInterval(cycleTimer);
+                    callback();
+                }
+            }, 1000);
+        }
+
+        // --- MESSAGING LOGIC ---
+
+        function sendMessage() {
+            const text = input.value.trim();
+            if (!text || !gameActive) return;
+            
+            // Add User Bubble
+            addBubble(text, 'sent');
+            input.value = "";
+            messagesSent++;
+
+            // Update Header Goal Status (Optional visual cue)
+            // Scroll to bottom
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            // Check Win
+            if (messagesSent >= GOAL) {
+                winGame();
+            }
+        }
+
+        function receiveMessage(text) {
+            addBubble(text, 'received');
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function addBubble(text, type) {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.innerText = text;
+            // Insert before typing bubble
+            chatArea.insertBefore(div, typingBubble);
+        }
+
+        function showTyping(show) {
+            typingBubble.style.display = show ? 'block' : 'none';
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function enableInput(enable) {
+            input.disabled = !enable;
+            sendBtn.disabled = !enable;
+            if (enable) {
+                input.placeholder = "iMessage";
+                input.focus();
+            } else {
+                input.placeholder = "Light is Red!";
+            }
+        }
+
+        function getRandomReply() {
+            const replies = [
+                "I saw you reaching for the phone.",
+                "Keep your eyes on the road.",
+                "Do you want a ticket?",
+                "Nice weather today.",
+                "License and registration please.",
+                "Why are you typing so fast?",
+                "Stop texting!"
+            ];
+            return replies[Math.floor(Math.random() * replies.length)];
+        }
+
+        // --- WIN STATE ---
+
+        function winGame() {
+            gameActive = false;
+            clearInterval(gameInterval);
+            clearInterval(cycleTimer);
+            
+            const overlay = document.getElementById('overlay');
+            overlay.innerHTML = `
+                <h1 style="font-size:3rem; margin:0;">VICTORY</h1>
+                <p style="font-size:1.5rem; margin-top:10px;">You sent 10 messages.</p>
+                <div style="font-size:4rem; font-weight:bold; color:#ffd60a;">${gameTime.toFixed(2)}s</div>
+                <button class="play-btn" onclick="location.reload()">Drive Again</button>
+            `;
+            overlay.classList.remove('hidden');
+        }
+
+        // Input Handler (Enter key)
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Unsubscribe Speedrun</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. GLOBAL RESET & MODERN BACKGROUND --- */
+        body { 
+            margin: 0; 
+            background-color: #f2f4f6; /* Modern SaaS Grey */
+            font-family: 'Inter', sans-serif; 
+            color: #111; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            overflow: hidden; 
+        }
+
+        /* --- 2. THE CUSTOM HEADER (From Screenshot) --- */
+        #site-header {
+            width: 100%;
+            padding: 20px 40px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        /* The Red Logo Box */
+        .brand-logo {
+            background-color: #ff4d4d; /* The specific red */
+            color: black;
+            font-weight: 800; /* Extra Bold */
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 8px 12px;
+            border: 3px solid black;
+            box-shadow: 5px 5px 0px black; /* Hard shadow offset */
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .brand-logo:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px black;
+        }
+        .brand-logo:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px black;
+        }
+
+        .nav-link {
+            font-weight: 800;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: black;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+        }
+        .nav-link:hover { text-decoration: underline; }
+
+        /* --- 3. THE FLOATING EMAIL CONTAINER --- */
+        #app-wrapper {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 650px; /* Constrained width */
+            height: 75vh;     /* Not full screen, floating */
+            max-height: 800px;
+            background: white;
+            border-radius: 16px; /* Modern round edges */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08); /* Soft modern shadow */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Clips content to rounded corners */
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.05); /* Subtle border */
+        }
+        
+        /* --- EMAIL UI --- */
+        #email-header { 
+            padding: 24px; 
+            border-bottom: 1px solid #f0f0f0; 
+            flex-shrink: 0; 
+            background: white;
+        }
+        .subject-line { font-size: 20px; margin-bottom: 12px; font-weight: 600; }
+        .sender-info { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 42px; height: 42px; border-radius: 50%; background-color: #ef5350; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+        .sender-details { display: flex; flex-direction: column; }
+        .sender-name { font-weight: 700; font-size: 14px; color: #111; }
+        .sender-email { color: #666; font-size: 13px; }
+        
+        #email-body { 
+            padding: 30px; 
+            line-height: 1.6; 
+            font-size: 15px; 
+            color: #333;
+            overflow-y: auto; 
+            flex-grow: 1; 
+            position: relative; 
+        }
+
+        /* --- GAME ELEMENTS --- */
+        .btn { 
+            background-color: #111; 
+            color: white; 
+            border: none; 
+            padding: 12px 28px; 
+            border-radius: 50px; /* Pill shape */
+            font-weight: 600; 
+            cursor: pointer; 
+            margin-top: 24px; 
+            font-size: 14px; 
+            transition: background 0.2s;
+        }
+        .btn:hover { background-color: #333; transform: translateY(-1px); }
+        .link { color: #666; text-decoration: underline; cursor: pointer; font-size: 12px; transition: color 0.2s; }
+        .link:hover { color: #111; }
+        .hidden { display: none !important; }
+        
+        /* Level Specifics */
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #111; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .runner { position: absolute; padding: 12px; background: #f8f9fa; border: 1px solid #e1e4e8; cursor: pointer; border-radius: 8px; font-size: 13px; font-weight: 500; }
+        .dvd-logo { position: absolute; font-weight: 800; color: #ff4d4d; user-select: none; cursor: pointer; font-size: 18px; }
+        
+        /* OVERLAY */
+        #overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; padding: 20px; }
+        .overlay-title { font-size: 2rem; font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; }
+        .play-btn { 
+            background: #ff4d4d; 
+            color: black; 
+            padding: 16px 48px; 
+            border: 3px solid black;
+            box-shadow: 4px 4px 0 black;
+            font-size: 16px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            margin-top: 30px; 
+            text-transform: uppercase;
+            transition: transform 0.1s;
+        }
+        .play-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 black; }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            #site-header { padding: 15px 20px; }
+            #app-container { height: 85vh; width: 100%; border-radius: 12px; }
+            .brand-logo { font-size: 1rem; padding: 6px 10px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header id="site-header">
+        <a href="../index.html" class="brand-logo">IdeaGames</a>
+        <a href="#" class="nav-link">About</a>
+    </header>
+
+    <div id="app-wrapper">
+        <div id="app-container">
+            <div id="email-header">
+                <div class="subject-line" id="subject">Loading...</div>
+                <div class="sender-info">
+                    <div class="avatar" id="avatar">M</div>
+                    <div class="sender-details">
+                        <span class="sender-name" id="sender">...</span>
+                        <span class="sender-email">noreply@spam-corp.com</span>
+                    </div>
+                </div>
+            </div>
+            <div id="email-body"></div>
+            
+            <div id="overlay">
+                <div class="overlay-title" id="title-text">Unsubscribe<br>Speedrun</div>
+                <p id="desc-text" style="color:#666; max-width: 300px; line-height: 1.5;">They made it impossible to leave. Prove them wrong.</p>
+                <button class="play-btn" onclick="startGame()">Open Inbox</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME STATE ---
+        let currentLevel = 0;
+        let intervalId = null; // For loops (DVD logo, etc)
+        const bodyEl = document.getElementById('email-body');
+
+        // --- LEVEL DEFINITIONS ---
+        const levels = [
+            {   // 1
+                sender: "Daily Cat Facts", subject: "Welcome to the family!",
+                html: `<p>You are subscribed to Cat Facts. We will email you every 4 minutes forever.</p><button class="btn">View More Cats</button><br><br><br><div style="text-align:center;"><a onclick="nextLevel()" class="link">Unsubscribe from all emails</a></div>`
+            },
+            {   // 2
+                sender: "Gym Membership", subject: "We miss you",
+                html: `<p>We noticed you haven't visited in 3 years. We are auto-renewing your contract.</p><p>If you want to leave, click the white text below.</p><div onclick="nextLevel()" style="color:white; cursor:pointer; margin-top:20px; user-select:none; background:white; display:inline-block;">Unsubscribe me please</div><br><button class="btn">RENEW MEMBERSHIP ($499)</button>`
+            },
+            {   // 3 (Moving Button)
+                sender: "Tech Support", subject: "Action Required",
+                html: `<p>To stop receiving these alerts, please click the button below.</p><div id="runner" class="runner" onmouseover="moveBtn()" ontouchstart="moveBtn()" onclick="nextLevel()">Unsubscribe</div>`
+            },
+            {   // 4 (Math)
+                sender: "Security Team", subject: "Verify Human",
+                html: `<p>Please solve this to unsubscribe:</p><p style="font-size:18px; font-weight:bold;">2 + 2 x 0 = ?</p><div style="display:flex; gap:10px; margin-top:20px;"><button class="btn" style="margin:0;" onclick="alert('Wrong! Order of operations!')">0</button> <button class="btn" style="margin:0;" onclick="nextLevel()">2</button> <button class="btn" style="margin:0;" onclick="alert('Wrong!')">4</button></div>`
+            },
+            {   // 5 (Guilt Trip)
+                sender: "Sad CEO", subject: "My kids need shoes",
+                html: `<p>If you leave, our stock price goes down.</p><p>Please don't go.</p><br><a onclick="if(confirm('Are you sure?')){if(confirm('Really sure?')){nextLevel()}}" class="link">I don't care, unsubscribe</a>`
+            },
+            {   // 6 (Loading)
+                sender: "System", subject: "Processing Request...",
+                html: `<p>Locating your profile in the database...</p><div class="spinner"></div><div id="hidden-link" class="hidden" style="text-align:center;"><br><a onclick="nextLevel()" class="link">Unsubscribe</a></div>`,
+                init: () => setTimeout(() => { document.querySelector('.spinner').style.display='none'; document.getElementById('hidden-link').classList.remove('hidden'); }, 3000)
+            },
+            {   // 7 (Broken Image)
+                sender: "Marketing", subject: "Free Gift Inside",
+                html: `<p>Click the image below to opt-out:</p><div style="padding:20px; border:1px dashed #ccc; display:inline-block;"><img src="broken.jpg" alt="Unsubscribe" onclick="nextLevel()" style="width:24px; height:24px; border:1px solid #ccc; cursor:pointer; display:block;"></div>`
+            },
+            {   // 8 (Scroll)
+                sender: "Legal Team", subject: "Updated Terms of Service",
+                html: `<p>Please read our updated TOC to proceed.</p><div style="height:200px; overflow-y:scroll; border:1px solid #eee; padding:15px; background:#f9f9f9; border-radius:8px;"><p>Lorem ipsum dolor sit amet...</p><div style="height:800px;"></div><p>End of terms.</p><a onclick="nextLevel()" class="link">I do not accept (Unsubscribe)</a></div>`
+            },
+            {   // 9 (Hover Trap)
+                sender: "Growth Team", subject: "Don't leave!",
+                html: `<p>Hover over the button to unsubscribe.</p><button id="swap-btn" class="btn" onmouseover="this.innerText='SUBSCRIBE FOREVER'; this.style.backgroundColor='#ff4d4d';" onmouseout="this.innerText='Unsubscribe'; this.style.backgroundColor='#111';">Unsubscribe</button><br><br><div style="font-size:10px; color:#ddd; cursor:pointer;" onclick="nextLevel()">Actually Unsubscribe</div>`
+            },
+            {   // 10 (Dead Pixel)
+                sender: "Unknown", subject: "Error 404",
+                html: `<p>System Error. Find the dead pixel to reset connection.</p><div onclick="nextLevel()" style="width:6px; height:6px; background:#e0e0e0; position:absolute; top:120px; right:50px; cursor:pointer; border-radius:50%;"></div>`
+            },
+            {   // 11 (Double Negative)
+                sender: "Newsletter", subject: "Email Preferences",
+                html: `<p>Uncheck the box if you do <strong>not</strong> want to <strong>stop</strong> receiving emails.</p><div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-top:10px;"><input type="checkbox" id="chk" checked> I want to stop not receiving updates.</div><button class="btn" onclick="checkLvl11()">Save Preferences</button>`
+            },
+            {   // 12 (Color Swap)
+                sender: "UX Design", subject: "Your Choice",
+                html: `<p>Green means go. Red means stop.</p><div style="display:flex; gap:10px;"><button class="btn" style="background:#4caf50;" onclick="alert('Subscribed for 100 years!')">Unsubscribe</button> <button class="btn" style="background:#f44336;" onclick="alert('Subscribed for 1000 years!')">Cancel</button></div><br><br><a onclick="nextLevel()" class="link" style="color:#f2f4f6;">Opt out</a>`
+            },
+            {   // 13 (Login)
+                sender: "Account Security", subject: "Login Required",
+                html: `<p>Please enter your password to unsubscribe.</p><input type="password" id="pw" placeholder="Password" style="padding:10px; width:100%; border:1px solid #ddd; border-radius:6px; margin-top:10px;"><button class="btn" onclick="if(document.getElementById('pw').value.length > 0){nextLevel()}">Login & Unsubscribe</button>`
+            },
+            {   // 14 (Survey)
+                sender: "Feedback", subject: "Why are you leaving?",
+                html: `<p>We need to know why.</p><div style="display:flex; flex-direction:column; gap:10px;"><label><input type="radio" name="r"> I hate puppies</label><label><input type="radio" name="r"> I hate joy</label><label><input type="radio" name="r"> I am boring</label></div><button class="btn" onclick="if(document.querySelector('input[name=r]:checked')){nextLevel()}">Submit Feedback</button>`
+            },
+            {   // 15 (Code)
+                sender: "Security", subject: "Verification Code: 8421",
+                html: `<p>Enter the code found in the subject line to proceed.</p><input type="text" id="code" style="padding:10px; width:100px; border:1px solid #ddd; border-radius:6px;"><button class="btn" onclick="if(document.getElementById('code').value === '8421'){nextLevel()}">Verify</button>`
+            },
+            {   // 16 (Typing)
+                sender: "Admin", subject: "Confirmation",
+                html: `<p>Please type <strong>'I give up'</strong> to confirm.</p><input type="text" id="phrase" style="padding:10px; width:100%; border:1px solid #ddd; border-radius:6px;"><button class="btn" onclick="if(document.getElementById('phrase').value.toLowerCase() === 'i give up'){nextLevel()}">Confirm</button>`
+            },
+            {   // 17 (Printer)
+                sender: "Office", subject: "Print Job #302",
+                html: `<div style="border:1px solid #ccc; padding:20px; background:#f0f0f0; width:220px; border-radius:4px; box-shadow:5px 5px 10px rgba(0,0,0,0.1);"><strong>Print</strong><br>Pages: All<br><div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;"><button onclick="alert('Printing...')" style="padding:5px 10px;">Print</button> <button onclick="nextLevel()" style="padding:5px 10px;">Cancel</button></div></div>`
+            },
+            {   // 18 (Wingdings)
+                sender: "???", subject: "???",
+                html: `<p style="font-family: 'Wingdings', monospace; font-size: 24px;">To unsubscribe click here</p><a onclick="nextLevel()" class="link" style="font-family:'Courier New'; font-size:14px; margin-top:20px; display:inline-block;">Unsubscribe</a>`
+            },
+            {   // 19 (DVD Logo)
+                sender: "Screensaver", subject: "System Idle",
+                html: `<div id="dvd" class="dvd-logo" onclick="nextLevel()">Unsubscribe</div>`,
+                init: () => {
+                    const el = document.getElementById('dvd');
+                    let x=0, y=0, dx=3, dy=3;
+                    intervalId = setInterval(() => {
+                        const bounds = document.getElementById('email-body').getBoundingClientRect();
+                        if(x+120 > bounds.width || x < 0) dx = -dx;
+                        if(y+30 > bounds.height || y < 0) dy = -dy;
+                        x += dx; y += dy;
+                        el.style.left = x + 'px'; el.style.top = y + 'px';
+                    }, 20);
+                }
+            },
+            {   // 20 (Boss)
+                sender: "THE BOSS", subject: "FINAL OFFER",
+                html: `<p><strong>Prove you are worthy.</strong></p><p>1. Solve: 5 + 5</p><input type="text" id="boss-math" size="3" style="padding:5px;"> <br><br> <p>2. Verify Humanity</p><input type="checkbox" id="boss-check"> I am human <br> <div id="boss-btn" style="position:absolute; top:250px; left:50px; background:#ff4d4d; color:black; font-weight:bold; border:2px solid black; padding:10px 20px; cursor:pointer;" onmouseover="bossMove()" onclick="checkBoss()">UNSUBSCRIBE</div>`
+            }
+        ];
+
+        // --- GAME LOGIC ---
+
+        function startGame() {
+            document.getElementById('overlay').classList.add('hidden');
+            loadLevel(0);
+        }
+
+        function loadLevel(idx) {
+            // Cleanup previous level timers
+            if (intervalId) { clearInterval(intervalId); intervalId = null; }
+
+            if (idx >= levels.length) {
+                // WIN STATE
+                document.getElementById('title-text').innerText = "VICTORY";
+                document.getElementById('desc-text').innerText = "You have successfully unsubscribed from everything.";
+                document.querySelector('.play-btn').innerText = "Play Again";
+                document.querySelector('.play-btn').onclick = () => location.reload();
+                document.getElementById('overlay').classList.remove('hidden');
+                return;
+            }
+
+            const lvl = levels[idx];
+            document.getElementById('subject').innerText = lvl.subject;
+            document.getElementById('sender').innerText = lvl.sender;
+            document.getElementById('avatar').innerText = lvl.sender.charAt(0);
+            
+            // Random color for avatar
+            const colors = ['#ef5350', '#ab47bc', '#5c6bc0', '#26a69a', '#ffa726', '#8d6e63'];
+            document.getElementById('avatar').style.backgroundColor = colors[idx % colors.length];
+            
+            bodyEl.innerHTML = lvl.html;
+            
+            // Run Init if exists
+            if (lvl.init) lvl.init();
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            // Flash effect
+            document.getElementById('app-container').style.opacity = '0';
+            setTimeout(() => {
+                loadLevel(currentLevel);
+                document.getElementById('app-container').style.opacity = '1';
+            }, 200);
+        }
+
+        // --- SPECIAL FUNCTIONS ---
+
+        function moveBtn() {
+            const btn = document.getElementById('runner');
+            const x = Math.floor(Math.random() * 200) - 100;
+            const y = Math.floor(Math.random() * 200) - 100;
+            btn.style.transform = `translate(${x}px, ${y}px)`;
+        }
+
+        function checkLvl11() {
+            const chk = document.getElementById('chk');
+            // "Uncheck if you do not want to stop" -> Unchecked means STOP.
+            if (!chk.checked) nextLevel();
+            else alert("You agreed to stay!");
+        }
+
+        function bossMove() {
+            const btn = document.getElementById('boss-btn');
+            const x = Math.random() * 200;
+            const y = Math.random() * 250;
+            btn.style.top = y + 'px';
+            btn.style.left = x + 'px';
+        }
+
+        function checkBoss() {
+            const math = document.getElementById('boss-math').value;
+            const chk = document.getElementById('boss-check').checked;
+            if (math === '10' && chk) {
+                nextLevel();
+            } else {
+                alert("Complete the form first!");
+            }
+        }
+
+    </script>
+</body>
+</html>

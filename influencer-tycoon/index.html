@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influencer Tycoon</title>
+    <style>
+        body {
+            background-color: #f4f4f0;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            user-select: none;
+        }
+        .header { margin-top: 20px; }
+        h1 { margin: 0; }
+        
+        .stats-box {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #ff4757;
+        }
+        .sub-text { font-size: 1rem; color: #666; }
+
+        /* The Big Button */
+        #post-btn {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid #1a1a1a;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 0 #ddd;
+            transition: all 0.1s;
+            margin-bottom: 40px;
+        }
+        #post-btn:active {
+            transform: translateY(10px);
+            box-shadow: 0 0 0 #ddd;
+        }
+
+        /* Upgrades */
+        .store {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        .upgrade {
+            background: white;
+            border: 2px solid #1a1a1a;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .upgrade:hover { background: #eee; }
+        .price { color: #00aa00; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+    <div style="background:white; border-bottom:3px solid black; padding:15px; font-family:'Courier New', monospace;">
+        <a href="../index.html" style="text-decoration:none; color:black; font-weight:bold; font-size:1.2rem; display:flex; align-items:center; gap:10px;">
+            <span style="background:black; color:white; padding:0 10px;">←</span> 
+            BACK TO IDEA GAMES
+        </a>
+    </div>
+
+    <div class="sub-text">CURRENT FOLLOWERS</div>
+    <div class="stats-box" id="follower-count">0</div>
+
+    <button id="post-btn" onclick="postCringe()">POST<br>CRINGE</button>
+
+    <div class="store">
+        <div class="sub-text" style="margin-bottom:10px;">BUY ENGAGEMENT:</div>
+        
+        <div class="upgrade" onclick="buyUpgrade('bot', 100, 1)">
+            <div>
+                <strong>Buy 1 Bot</strong><br>
+                <small>+1 follower / sec</small>
+            </div>
+            <div class="price">100 Flwrs</div>
+        </div>
+
+        <div class="upgrade" onclick="buyUpgrade('drama', 500, 10)">
+            <div>
+                <strong>Start Internet Drama</strong><br>
+                <small>+10 followers / sec</small>
+            </div>
+            <div class="price">500 Flwrs</div>
+        </div>
+    </div>
+
+    <script>
+        let followers = 0;
+        let followersPerSecond = 0;
+
+        const counter = document.getElementById('follower-count');
+
+        function postCringe() {
+            followers++;
+            updateUI();
+        }
+
+        function buyUpgrade(type, cost, rate) {
+            if (followers >= cost) {
+                followers -= cost;
+                followersPerSecond += rate;
+                updateUI();
+            } else {
+                alert("Not enough clout!");
+            }
+        }
+
+        // Game Loop (Runs every second)
+        setInterval(() => {
+            followers += followersPerSecond;
+            updateUI();
+        }, 1000);
+
+        function updateUI() {
+            counter.innerText = Math.floor(followers);
+        }
+    </script>
+</body>
+</html>
