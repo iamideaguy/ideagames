@@ -4,62 +4,78 @@
     <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-E4PJR6D8CJ"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-E4PJR6D8CJ');
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-E4PJR6D8CJ');
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Middle Class Museum</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
+        /* --- GLOBAL RESET --- */
         body {
             margin: 0;
-            background-color: #f4f1ea; /* "Museum Wall" Cream */
+            background-color: #f4f1ea;
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden; /* We control the scroll manually */
             height: 100vh;
+            overflow: hidden; /* Prevent vertical bounce on Mac/iOS */
         }
 
-        /* --- UI LAYER --- */
+        /* --- HEADER --- */
         #header {
             position: fixed;
             top: 0; left: 0;
-            padding: 30px;
+            padding: 20px;
             z-index: 100;
-            mix-blend-mode: difference; /* Cool effect over images */
-            color: #fff; /* Inverted by blend mode */
+            mix-blend-mode: difference;
+            color: #fff;
+            pointer-events: none; /* Let clicks pass through */
         }
         h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 2rem;
+            font-size: 1.5rem; /* Smaller for mobile */
             margin: 0;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
-        .subtitle { font-size: 0.9rem; margin-top: 5px; opacity: 0.8; }
+        .subtitle { font-size: 0.8rem; margin-top: 5px; opacity: 0.8; }
 
-        /* --- THE SCROLL TRACK --- */
-        #museum-track {
+        /* --- THE SCROLL CONTAINER (Magic Happens Here) --- */
+        #museum-container {
             display: flex;
             align-items: center;
             height: 100vh;
-            padding-left: 10vw; /* Start with some space */
-            padding-right: 20vw; /* End space */
-            gap: 15vw; /* Space between exhibits */
-            width: max-content; /* Allow it to be very wide */
-            will-change: transform;
+            overflow-x: auto; /* Enable native horizontal scroll */
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory; /* The "Snap" effect */
+            -webkit-overflow-scrolling: touch; /* Smooth momentum on iOS */
+            padding-left: 10vw; 
+            padding-right: 10vw;
+            gap: 20px;
         }
+
+        /* Hide Scrollbar */
+        #museum-container::-webkit-scrollbar { display: none; }
+        #museum-container { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* --- THE EXHIBIT CARD --- */
         .exhibit {
             position: relative;
-            width: 400px;
-            height: 600px;
             flex-shrink: 0;
-            transition: transform 0.3s ease-out;
+            scroll-snap-align: center; /* Snap center of card to center of screen */
+            width: 400px; /* Desktop width */
+            height: 600px;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Mobile Adjustment */
+        @media (max-width: 600px) {
+            .exhibit {
+                width: 85vw; /* Take up mostly full screen width */
+                height: 70vh;
+            }
         }
         
         /* The Image/Asset */
@@ -67,19 +83,18 @@
             width: 100%;
             height: 70%;
             background: #ddd;
-            border: 10px solid white;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            border: 8px solid white;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
         }
-        .artifact img { width: 100%; height: 100%; object-fit: cover; }
         
         /* The Placard (Text) */
         .placard {
             background: white;
-            padding: 20px 25px;
-            width: 90%;
-            margin: -40px auto 0 auto; /* Overlap the image */
+            padding: 20px;
+            width: 85%;
+            margin: -30px auto 0 auto;
             position: relative;
             z-index: 2;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
@@ -88,39 +103,44 @@
 
         .year-badge {
             font-family: 'Playfair Display', serif;
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: #ccc;
             position: absolute;
-            top: -50px;
-            right: -20px;
+            top: -60px;
+            right: -10px;
             font-weight: bold;
             z-index: 0;
+            opacity: 0.5;
         }
 
-        h2 { margin: 0 0 10px 0; font-family: 'Playfair Display', serif; font-size: 1.5rem; }
-        .price { color: #d64045; font-weight: bold; font-family: 'Playfair Display', serif; font-size: 1.2rem; display: block; margin-bottom: 10px; }
-        p { font-size: 0.9rem; line-height: 1.6; color: #555; margin: 0; }
+        h2 { margin: 0 0 5px 0; font-family: 'Playfair Display', serif; font-size: 1.4rem; }
+        .price { color: #d64045; font-weight: bold; font-family: 'Playfair Display', serif; font-size: 1.1rem; display: block; margin-bottom: 10px; }
+        p { font-size: 0.85rem; line-height: 1.5; color: #555; margin: 0; }
         
-        /* "Then vs Now" comparisons */
         .comparison {
-            font-size: 0.8rem;
-            margin-top: 15px;
-            padding-top: 15px;
+            font-size: 0.75rem;
+            margin-top: 10px;
+            padding-top: 10px;
             border-top: 1px solid #eee;
             color: #888;
         }
         .comparison strong { color: #333; }
 
-        /* --- FOOTER / INSTRUCTIONS --- */
+        /* --- FOOTER INSTRUCTION --- */
         #scroll-instruction {
             position: fixed;
-            bottom: 30px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             letter-spacing: 2px;
             text-transform: uppercase;
             animation: pulse 2s infinite;
+            pointer-events: none;
+            color: #333;
+            background: rgba(255,255,255,0.8);
+            padding: 5px 10px;
+            border-radius: 20px;
         }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
@@ -129,96 +149,100 @@
 <body>
 
     <header id="header">
-        <h1>The Middle Class Museum</h1>
-        <div class="subtitle">A memorial to affordable living (1980 - 2010).</div>
+        <h1>Middle Class Museum</h1>
+        <div class="subtitle">A memorial to affordable living.</div>
     </header>
 
-    <div id="scroll-instruction">Scroll Horizontal →</div>
+    <div id="scroll-instruction">Swipe →</div>
 
-    <div id="museum-container" style="overflow-x: scroll; height: 100vh;">
-        <div id="museum-track">
+    <div id="museum-container">
 
-            <div class="exhibit">
-                <span class="year-badge">1980</span>
-                <div class="artifact" style="background: #e3d5ca;">
-                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:3rem;">🏠</div>
-                </div>
-                <div class="placard">
-                    <h2>The Starter Home</h2>
-                    <span class="price">$47,200</span>
-                    <p>A 3-bedroom house with a yard. Usually purchased by a single income factory worker named Gary at age 24.</p>
-                    <div class="comparison">
-                        <strong>Today:</strong> Would cost $450,000. You are currently renting Gary's basement.
-                    </div>
+        <div style="width: 1vw; flex-shrink: 0;"></div>
+
+        <div class="exhibit">
+            <span class="year-badge">1980</span>
+            <div class="artifact" style="background: #e3d5ca;">
+                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:4rem;">🏠</div>
+            </div>
+            <div class="placard">
+                <h2>The Starter Home</h2>
+                <span class="price">$47,200</span>
+                <p>A 3-bedroom house with a yard. Usually purchased by a single income factory worker named Gary at age 24.</p>
+                <div class="comparison">
+                    <strong>Today:</strong> $450,000. You are renting Gary's basement.
                 </div>
             </div>
-
-            <div class="exhibit">
-                <span class="year-badge">1990</span>
-                <div class="artifact" style="background: #d5e3ca;">
-                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:3rem;">🎓</div>
-                </div>
-                <div class="placard">
-                    <h2>State University</h2>
-                    <span class="price">$3,800 / year</span>
-                    <p>Tuition could be paid for by working a summer job at a video store. No loans required.</p>
-                    <div class="comparison">
-                        <strong>Today:</strong> $28,000 / year. Your student loans will outlive your pets.
-                    </div>
-                </div>
-            </div>
-
-            <div class="exhibit">
-                <span class="year-badge">1995</span>
-                <div class="artifact" style="background: #cad5e3;">
-                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:3rem;">🎢</div>
-                </div>
-                <div class="placard">
-                    <h2>Disney World Ticket</h2>
-                    <span class="price">$37.00</span>
-                    <p>A standard middle-class family vacation. You didn't need a payment plan or a "Lightning Lane" subscription.</p>
-                    <div class="comparison">
-                        <strong>Today:</strong> $160.00+. You need a second mortgage for the churros.
-                    </div>
-                </div>
-            </div>
-
-            <div class="exhibit">
-                <span class="year-badge">2001</span>
-                <div class="artifact" style="background: #e3cada;">
-                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:3rem;">🍔</div>
-                </div>
-                <div class="placard">
-                    <h2>The Big Mac</h2>
-                    <span class="price">$2.45</span>
-                    <p>Cheap, fast food was actually cheap. It was the budget option.</p>
-                    <div class="comparison">
-                        <strong>Today:</strong> $6.50+. It is now cheaper to cook a steak at home (almost).
-                    </div>
-                </div>
-            </div>
-
-            <div class="exhibit" style="width: 600px;">
-                <span class="year-badge">2024</span>
-                <div class="artifact" style="background: #111; color: white; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px;">
-                    <div>
-                        <h2 style="font-size: 3rem; margin-bottom: 20px;">The "Subscription" Life</h2>
-                        <p style="color: #999;">You own nothing.<br>You subscribe to everything.<br>Welcome to the future.</p>
-                    </div>
-                </div>
-            </div>
-
         </div>
+
+        <div class="exhibit">
+            <span class="year-badge">1990</span>
+            <div class="artifact" style="background: #d5e3ca;">
+                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:4rem;">🎓</div>
+            </div>
+            <div class="placard">
+                <h2>State University</h2>
+                <span class="price">$3,800 / year</span>
+                <p>Tuition could be paid for by working a summer job at a video store. No loans required.</p>
+                <div class="comparison">
+                    <strong>Today:</strong> $28,000 / year. Loans forever.
+                </div>
+            </div>
+        </div>
+
+        <div class="exhibit">
+            <span class="year-badge">1995</span>
+            <div class="artifact" style="background: #cad5e3;">
+                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:4rem;">🎢</div>
+            </div>
+            <div class="placard">
+                <h2>Disney World Ticket</h2>
+                <span class="price">$37.00</span>
+                <p>A standard middle-class family vacation. You didn't need a payment plan or a "Lightning Lane" subscription.</p>
+                <div class="comparison">
+                    <strong>Today:</strong> $160.00+.
+                </div>
+            </div>
+        </div>
+
+        <div class="exhibit">
+            <span class="year-badge">2001</span>
+            <div class="artifact" style="background: #e3cada;">
+                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:4rem;">🍔</div>
+            </div>
+            <div class="placard">
+                <h2>The Big Mac</h2>
+                <span class="price">$2.45</span>
+                <p>Cheap, fast food was actually cheap. It was the budget option.</p>
+                <div class="comparison">
+                    <strong>Today:</strong> $6.50+.
+                </div>
+            </div>
+        </div>
+
+        <div class="exhibit">
+            <span class="year-badge">2024</span>
+            <div class="artifact" style="background: #111; color: white; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+                <div>
+                    <h2 style="font-size: 2rem; margin-bottom: 20px; color: white;">The End</h2>
+                    <p style="color: #999;">You own nothing.<br>You subscribe to everything.<br>Good luck.</p>
+                    <a href="../index.html" style="color: white; margin-top: 30px; display: block; text-decoration: underline;">Back to IdeaGames</a>
+                </div>
+            </div>
+        </div>
+        
+        <div style="width: 5vw; flex-shrink: 0;"></div>
+
     </div>
 
     <script>
-        // HORIZONTAL SCROLL HACK
-        // Use the mouse wheel to scroll horizontally instead of vertically
+        // Desktop Mouse Wheel Support
+        // This converts vertical mouse wheel scrolling into horizontal scrolling for desktop users
         const container = document.getElementById('museum-container');
-
         container.addEventListener('wheel', (evt) => {
-            evt.preventDefault();
-            container.scrollLeft += evt.deltaY;
+            if (evt.deltaY !== 0) {
+                evt.preventDefault();
+                container.scrollLeft += evt.deltaY;
+            }
         });
     </script>
 </body>
