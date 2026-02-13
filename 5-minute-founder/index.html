@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The 5-Minute Founder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- BRUTALIST CORPORATE THEME --- */
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: 'Inter', sans-serif;
+            color: #111;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- MAIN DEVICE CONTAINER --- */
+        #game-device {
+            width: 100%;
+            max-width: 450px;
+            height: 100%;
+            max-height: 900px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 40px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* --- HUD (STATS) --- */
+        #hud {
+            padding: 15px;
+            border-bottom: 3px solid #111;
+            background: #fff;
+            z-index: 10;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .stat-box { display: flex; align-items: center; gap: 5px; }
+        
+        /* Progress Bars */
+        .bar-container {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border: 1px solid #ccc;
+            margin-top: 2px;
+        }
+        .bar-fill { height: 100%; transition: width 0.3s; }
+        #sanity-fill { background: #111; }
+        #hype-fill { background: #ff00ff; } /* Hot Pink for Hype */
+
+        #timer-bar {
+            height: 4px;
+            background: #111;
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+        /* --- CARD AREA --- */
+        #stage {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        #level-indicator {
+            position: absolute;
+            top: 20px;
+            font-size: 0.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888;
+        }
+
+        #emoji-icon { font-size: 5rem; margin-bottom: 20px; }
+
+        #scenario-text {
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
+
+        /* --- CONTROLS --- */
+        #controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 20px;
+            background: #fff;
+            border-top: 3px solid #111;
+        }
+
+        .btn {
+            background: #fff;
+            border: 3px solid #111;
+            padding: 20px 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 4px 4px 0 #111;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #111; }
+        .btn:hover { background: #ffffcc; }
+
+        /* --- OVERLAYS --- */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .hidden { display: none !important; }
+
+        /* Consequence Popup */
+        #feedback-overlay { background: rgba(0,0,0,0.9); color: white; }
+        #feedback-text { font-size: 1.8rem; font-weight: 800; margin-bottom: 20px; }
+        .stat-change { font-size: 1.2rem; margin: 5px 0; font-family: monospace; }
+        .positive { color: #00ff00; }
+        .negative { color: #ff3333; }
+
+        .big-title { font-size: 3.5rem; line-height: 1; letter-spacing: -3px; margin: 0; }
+        .subtitle { font-size: 1.2rem; color: #666; margin-top: 10px; margin-bottom: 40px; }
+        
+        .start-btn {
+            background: #111; color: white; border: none;
+            padding: 15px 40px; font-size: 1.5rem; font-weight: 700;
+            cursor: pointer; border-radius: 50px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-device">
+        
+        <div id="timer-bar"></div>
+
+        <div id="hud">
+            <div class="stat-row">
+                <div class="stat-box">💸 <span id="cash-val">$1,000,000</span></div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-box" style="width: 48%;">
+                    🧠 <div class="bar-container"><div id="sanity-fill" class="bar-fill" style="width: 100%;"></div></div>
+                </div>
+                <div class="stat-box" style="width: 48%;">
+                    🦄 <div class="bar-container"><div id="hype-fill" class="bar-fill" style="width: 0%;"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="stage">
+            <div id="level-indicator">LEVEL 1/30</div>
+            <div id="emoji-icon">🐹</div>
+            <div id="scenario-text">Your roommate pitches "Uber for Hamsters."</div>
+        </div>
+
+        <div id="controls">
+            <button class="btn" id="btn-a" onclick="makeChoice('A')">Join Him</button>
+            <button class="btn" id="btn-b" onclick="makeChoice('B')">Steal Idea</button>
+        </div>
+
+        <div id="start-screen" class="overlay">
+            <h1 class="big-title">5 MIN<br>FOUNDER</h1>
+            <div class="subtitle">30 Levels. 3 Stats.<br>Don't run out of cash.</div>
+            <button class="start-btn" onclick="startGame()">START</button>
+        </div>
+
+        <div id="feedback-overlay" class="overlay hidden" onclick="nextLevel()">
+            <div id="feedback-text">RESULT TEXT HERE</div>
+            <div id="feedback-details"></div>
+            <div style="margin-top: 30px; font-size: 0.8rem; color: #888; text-transform: uppercase;">Tap to continue</div>
+        </div>
+
+        <div id="end-screen" class="overlay hidden">
+            <h1 id="end-title" class="big-title">GAME OVER</h1>
+            <div id="end-reason" class="subtitle">You ran out of money.</div>
+            <button class="start-btn" onclick="location.reload()">TRY AGAIN</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- GAME CONFIGURATION ---
+        const TOTAL_TIME = 300; // 5 Minutes
+        let state = {
+            cash: 1000000,
+            sanity: 100,
+            hype: 0,
+            timeLeft: TOTAL_TIME,
+            level: 0,
+            active: false
+        };
+
+        let timerInterval;
+
+        // --- THE 30 LEVELS (DATABASE) ---
+        const levels = [
+            // PHASE 1: GARAGE DAYS
+            {
+                text: "Roommate pitches 'Uber for Hamsters'.",
+                icon: "🐹",
+                btnA: "Join him",
+                btnB: "Steal the idea",
+                outcomeA: { text: "It's stupid, but investors love stupid.", cash: 0, hype: 10, sanity: -10 },
+                outcomeB: { text: "He sues you immediately.", cash: -50000, hype: 20, sanity: 0 }
+            },
+            {
+                text: "You need a domain name.",
+                icon: "🌐",
+                btnA: "Buy Hamstr.com ($50k)",
+                btnB: "Get HamstrApp.io ($10)",
+                outcomeA: { text: "Professional. Investors nod approvingly.", cash: -50000, hype: 10, sanity: 0 },
+                outcomeB: { text: "You saved cash, but nobody can spell it.", cash: -10, hype: -5, sanity: 0 }
+            },
+            {
+                text: "Choose your Tech Stack.",
+                icon: "💻",
+                btnA: "Boring Old SQL",
+                btnB: "Trendy New JS Framework",
+                outcomeA: { text: "It's boring, but it never crashes.", cash: 0, hype: -5, sanity: 10 },
+                outcomeB: { text: "Devs don't know how to use it. Chaos.", cash: 0, hype: 15, sanity: -20 }
+            },
+            {
+                text: "First Hire.",
+                icon: "🤝",
+                btnA: "10x Rockstar Engineer",
+                btnB: "Community Manager",
+                outcomeA: { text: "He codes fast but refuses to document anything.", cash: 0, hype: 20, sanity: -15 },
+                outcomeB: { text: "Product is broken, but Discord is lit.", cash: 0, hype: 15, sanity: -10 }
+            },
+            {
+                text: "Design a Logo.",
+                icon: "🎨",
+                btnA: "Agency ($20k)",
+                btnB: "Free AI Generator",
+                outcomeA: { text: "Looks like Airbnb's logo rotated.", cash: -20000, hype: 10, sanity: 0 },
+                outcomeB: { text: "The hamster has 7 fingers. Twitter mocks you.", cash: 0, hype: 20, sanity: -10 }
+            },
+            {
+                text: "Data says users eat hamsters.",
+                icon: "🍖",
+                btnA: "Pivot to Food Delivery",
+                btnB: "Pivot to NFTs",
+                outcomeA: { text: "Safe choice. Revenue trickles in.", cash: 10000, hype: -10, sanity: 0 },
+                outcomeB: { text: "You sold 10k PNGs. You are rich but soulless.", cash: 200000, hype: 0, sanity: -50 }
+            },
+            {
+                text: "Big Investor Meeting.",
+                icon: "💼",
+                btnA: "Wear a Suit",
+                btnB: "Wear Pajamas",
+                outcomeA: { text: "They think you are a banker. Pass.", cash: 0, hype: -10, sanity: 0 },
+                outcomeB: { text: "They think you are a visionary. Funded.", cash: 500000, hype: 20, sanity: 0 }
+            },
+            {
+                text: "Server Crash!",
+                icon: "🔥",
+                btnA: "Rewrite Code",
+                btnB: "Buy More Servers",
+                outcomeA: { text: "3 days awake. You smell terrible.", cash: 0, hype: 0, sanity: -30 },
+                outcomeB: { text: "Problem solved. Burning cash.", cash: -50000, hype: 0, sanity: 0 }
+            },
+            {
+                text: "PM wants 'Stories' feature.",
+                icon: "📱",
+                btnA: "Build It",
+                btnB: "Refuse",
+                outcomeA: { text: "App is bloated. Users confused.", cash: 0, hype: -10, sanity: -10 },
+                outcomeB: { text: "Team thinks you lack vision.", cash: 0, hype: -5, sanity: 0 }
+            },
+            {
+                text: "Launch Day.",
+                icon: "🚀",
+                btnA: "Product Hunt",
+                btnB: "Super Bowl Ad",
+                outcomeA: { text: "#1 Product of the Day. Nice.", cash: 0, hype: 30, sanity: 0 },
+                outcomeB: { text: "You spent all your money. It flopped.", cash: -900000, hype: 50, sanity: 0 }
+            },
+
+            // PHASE 2: GROWTH
+            {
+                text: "Google clones your app.",
+                icon: "🦖",
+                btnA: "Sue Google",
+                btnB: "Tweet about it",
+                outcomeA: { text: "Lawyers took everything. You lost.", cash: -100000, hype: 0, sanity: -20 },
+                outcomeB: { text: "David vs Goliath narrative works.", cash: 0, hype: 20, sanity: 0 }
+            },
+            {
+                text: "Need Revenue Now.",
+                icon: "💰",
+                btnA: "Sell User Data",
+                btnB: "$5/mo Subscription",
+                outcomeA: { text: "GDPR nightmare, but easy money.", cash: 50000, hype: 0, sanity: -20 },
+                outcomeB: { text: "90% of users delete the app.", cash: 10000, hype: -30, sanity: 0 }
+            },
+            {
+                text: "Jake Paul wants to endorse.",
+                icon: "🥊",
+                btnA: "Pay him $50k",
+                btnB: "Pass",
+                outcomeA: { text: "Servers catch fire with 12-year-olds.", cash: -50000, hype: 40, sanity: -20 },
+                outcomeB: { text: "You kept your dignity.", cash: 0, hype: -10, sanity: 10 }
+            },
+            {
+                text: "Database Leaked.",
+                icon: "🔓",
+                btnA: "Pay Ransom",
+                btnB: "Deny Everything",
+                outcomeA: { text: "They leaked it anyway. Weak.", cash: -100000, hype: -20, sanity: 0 },
+                outcomeB: { text: "You blamed 'Russian Bots'. It worked.", cash: 0, hype: 10, sanity: -10 }
+            },
+            {
+                text: "Total Burnout.",
+                icon: "😵",
+                btnA: "Silent Retreat",
+                btnB: "Microdose Shrooms",
+                outcomeA: { text: "You are Zen. Company is on fire.", cash: 0, hype: -20, sanity: 50 },
+                outcomeB: { text: "You hallucinated a feature. It works.", cash: 0, hype: 10, sanity: -5 }
+            },
+            {
+                text: "Expand to new market.",
+                icon: "🌍",
+                btnA: "China",
+                btnB: "Europe",
+                outcomeA: { text: "Cloned and banned immediately.", cash: -200000, hype: -10, sanity: 0 },
+                outcomeB: { text: "GDPR fines took the profit.", cash: -50000, hype: 10, sanity: 0 }
+            },
+            {
+                text: "Co-founder Cancelled.",
+                icon: "🤬",
+                btnA: "Fire Him",
+                btnB: "Defend Him",
+                outcomeA: { text: "He was the only one who knew the code.", cash: 0, hype: 10, sanity: -30 },
+                outcomeB: { text: "Advertisers fled. Alt-right loves you.", cash: -50000, hype: 20, sanity: 0 }
+            },
+            {
+                text: "Softbank offers $100M.",
+                icon: "🤑",
+                btnA: "Take the Money",
+                btnB: "Stay Lean",
+                outcomeA: { text: "Unicorn status. Crushing pressure.", cash: 10000000, hype: 0, sanity: -50 },
+                outcomeB: { text: "Competitors outspend you.", cash: 0, hype: -20, sanity: 0 }
+            },
+            {
+                text: "Office Lease Up.",
+                icon: "🏢",
+                btnA: "Remote Forever",
+                btnB: "Fancy HQ",
+                outcomeA: { text: "Productivity up. Loneliness up.", cash: 50000, hype: 0, sanity: -10 },
+                outcomeB: { text: "Great vibe. Empty bank account.", cash: -100000, hype: 10, sanity: 0 }
+            },
+            {
+                text: "Users love a money-losing feature.",
+                icon: "❤️",
+                btnA: "Keep it",
+                btnB: "Kill it",
+                outcomeA: { text: "Users happy. CFO crying.", cash: -20000, hype: 10, sanity: 0 },
+                outcomeB: { text: "Review bomb: 1 Star.", cash: 20000, hype: -20, sanity: 0 }
+            },
+
+            // PHASE 3: THE EXIT
+            {
+                text: "Cook the books?",
+                icon: "📊",
+                btnA: "Lie to Board",
+                btnB: "Tell Truth",
+                outcomeA: { text: "They are impressed. You are a criminal.", cash: 0, hype: 20, sanity: -30 },
+                outcomeB: { text: "Board threatens to fire you.", cash: 0, hype: 0, sanity: -10 }
+            },
+            {
+                text: "Yahoo offers $50M.",
+                icon: "🟣",
+                btnA: "Sell",
+                btnB: "Hold for Billion",
+                outcomeA: { text: "You are free.", cash: 50000000, hype: 0, sanity: 100 }, // INSTANT WIN LOGIC HANDLED LATER
+                outcomeB: { text: "Greed is good? They buy competitor.", cash: 0, hype: -10, sanity: 0 }
+            },
+            {
+                text: "Burn rate too high.",
+                icon: "✂️",
+                btnA: "Fire 10% on Zoom",
+                btnB: "Cut CEO Salary",
+                outcomeA: { text: "Leaked video goes viral. Monster.", cash: 100000, hype: -30, sanity: 0 },
+                outcomeB: { text: "Noble. Stupid. Can't pay rent.", cash: 0, hype: 10, sanity: -20 }
+            },
+            {
+                text: "Technical Debt Crisis.",
+                icon: "🏗️",
+                btnA: "Pause to fix",
+                btnB: "Ignore it",
+                outcomeA: { text: "Investors scream at you.", cash: 0, hype: -20, sanity: 0 },
+                outcomeB: { text: "Major outage during Super Bowl.", cash: -50000, hype: -30, sanity: 0 }
+            },
+            {
+                text: "60 Minutes Interview.",
+                icon: "🎥",
+                btnA: "Be Humble",
+                btnB: "Act like Elon",
+                outcomeA: { text: "Boring TV. No one watched.", cash: 0, hype: 0, sanity: 0 },
+                outcomeB: { text: "Smoked on camera. Stock tanked.", cash: -100000, hype: 50, sanity: 0 }
+            },
+            {
+                text: "Patent Lawsuit.",
+                icon: "⚖️",
+                btnA: "Settle",
+                btnB: "Fight",
+                outcomeA: { text: "Expensive silence.", cash: -200000, hype: 0, sanity: 0 },
+                outcomeB: { text: "Years of court battles.", cash: 0, hype: 0, sanity: -40 }
+            },
+            {
+                text: "Market Crash.",
+                icon: "📉",
+                btnA: "Pivot to AI",
+                btnB: "Stay Course",
+                outcomeA: { text: "Desperate move.", cash: 0, hype: -10, sanity: 0 },
+                outcomeB: { text: "Respectable failure.", cash: 0, hype: 0, sanity: 10 }
+            },
+            {
+                text: "Activist Investor Attack.",
+                icon: "🦈",
+                btnA: "Fight him",
+                btnB: "Golden Parachute",
+                outcomeA: { text: "Civil war in boardroom.", cash: 0, hype: 0, sanity: -30 },
+                outcomeB: { text: "Took the money and ran.", cash: 10000000, hype: 0, sanity: 100 } // INSTANT WIN
+            },
+            {
+                text: "IPO Roadshow.",
+                icon: "🔔",
+                btnA: "Oversell It",
+                btnB: "Be Realistic",
+                outcomeA: { text: "SEC is watching you.", cash: 0, hype: 20, sanity: 0 },
+                outcomeB: { text: "Valuation drops 50%.", cash: -5000000, hype: 0, sanity: 0 }
+            },
+            {
+                text: "IPO Day.",
+                icon: "🏛️",
+                btnA: "Ring The Bell",
+                btnB: "Stay Private",
+                outcomeA: { text: "Public CEO. You are miserable.", cash: 100000000, hype: 100, sanity: 0 },
+                outcomeB: { text: "Kept your soul. Lost billions.", cash: 0, hype: 0, sanity: 100 }
+            }
+        ];
+
+        // --- GAME LOGIC ---
+
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            state.active = true;
+            state.level = 0;
+            state.timeLeft = TOTAL_TIME;
+            state.cash = 1000000;
+            state.sanity = 100;
+            state.hype = 0;
+            
+            updateHUD();
+            loadLevel(0);
+
+            // Start Timer
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!state.active) return; // Pause timer if overlay is up
+                state.timeLeft--;
+                document.getElementById('timer-bar').style.width = (state.timeLeft / TOTAL_TIME * 100) + "%";
+                if (state.timeLeft <= 0) gameOver("TIME'S UP", "You moved too slow.");
+            }, 1000);
+        }
+
+        function loadLevel(idx) {
+            if (idx >= levels.length) {
+                gameOver("YOU SURVIVED", "You completed the startup lifecycle.");
+                return;
+            }
+            
+            const lvl = levels[idx];
+            document.getElementById('level-indicator').innerText = `LEVEL ${idx + 1}/30`;
+            document.getElementById('emoji-icon').innerText = lvl.icon;
+            document.getElementById('scenario-text').innerText = lvl.text;
+            document.getElementById('btn-a').innerText = lvl.btnA;
+            document.getElementById('btn-b').innerText = lvl.btnB;
+        }
+
+        function makeChoice(choiceStr) {
+            state.active = false; // Pause game loop
+            const lvl = levels[state.level];
+            const outcome = choiceStr === 'A' ? lvl.outcomeA : lvl.outcomeB;
+
+            // Apply Stats
+            state.cash += outcome.cash;
+            state.hype += outcome.hype;
+            state.sanity += outcome.sanity;
+            
+            // Cap Stats
+            if (state.sanity > 100) state.sanity = 100;
+            if (state.hype < 0) state.hype = 0;
+            if (state.hype > 100) state.hype = 100;
+
+            // Show Feedback
+            const feedback = document.getElementById('feedback-overlay');
+            const details = document.getElementById('feedback-details');
+            
+            document.getElementById('feedback-text').innerText = outcome.text;
+            
+            // Build Stat Change Text
+            let html = "";
+            if (outcome.cash !== 0) html += `<div class="stat-change ${outcome.cash > 0 ? 'positive' : 'negative'}">${outcome.cash > 0 ? '+' : ''}$${Math.abs(outcome.cash).toLocaleString()}</div>`;
+            if (outcome.hype !== 0) html += `<div class="stat-change ${outcome.hype > 0 ? 'positive' : 'negative'}">${outcome.hype > 0 ? '+' : ''}${Math.abs(outcome.hype)} Hype</div>`;
+            if (outcome.sanity !== 0) html += `<div class="stat-change ${outcome.sanity > 0 ? 'positive' : 'negative'}">${outcome.sanity > 0 ? '+' : ''}${Math.abs(outcome.sanity)}% Sanity</div>`;
+            
+            details.innerHTML = html;
+            feedback.classList.remove('hidden');
+
+            updateHUD();
+            
+            // Check Instant Fail States
+            if (state.cash <= 0) {
+                state.deathReason = "BANKRUPTCY";
+                state.deathDesc = "You ran out of money.";
+                state.isDead = true;
+            } else if (state.sanity <= 0) {
+                state.deathReason = "BREAKDOWN";
+                state.deathDesc = "You went insane.";
+                state.isDead = true;
+            }
+            
+            // Check Instant Win (Sell scenarios)
+            if (outcome.text.includes("You are free") || outcome.text.includes("Took the money")) {
+                 state.deathReason = "EXIT ACQUIRED";
+                 state.deathDesc = "You won capitalism.";
+                 state.isWin = true;
+            }
+        }
+
+        function nextLevel() {
+            // Hide Feedback
+            document.getElementById('feedback-overlay').classList.add('hidden');
+            
+            // Check Death/Win Pending
+            if (state.isDead) {
+                gameOver(state.deathReason, state.deathDesc);
+                return;
+            }
+            if (state.isWin) {
+                gameOver(state.deathReason, state.deathDesc);
+                document.getElementById('end-title').style.color = "#00aa00";
+                return;
+            }
+
+            state.active = true; // Resume
+            state.level++;
+            loadLevel(state.level);
+        }
+
+        function updateHUD() {
+            document.getElementById('cash-val').innerText = "$" + state.cash.toLocaleString();
+            document.getElementById('sanity-fill').style.width = state.sanity + "%";
+            document.getElementById('hype-fill').style.width = state.hype + "%";
+            
+            // Visual Warning
+            document.getElementById('cash-val').style.color = state.cash < 100000 ? "red" : "black";
+        }
+
+        function gameOver(title, desc) {
+            state.active = false;
+            clearInterval(timerInterval);
+            document.getElementById('end-screen').classList.remove('hidden');
+            document.getElementById('end-title').innerText = title;
+            document.getElementById('end-reason').innerText = desc;
+        }
+
+    </script>
+</body>
+</html>

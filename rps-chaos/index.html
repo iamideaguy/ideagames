@@ -1,18 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-E4PJR6D8CJ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-E4PJR6D8CJ');
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPS: Ultimate Chaos</title>
+    <title>Rock Paper Scissors and More</title>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -27,97 +18,93 @@
         }
 
         /* --- HEADER --- */
-        header { padding: 30px; text-align: center; }
-        h1 { font-family: 'Archivo Black', sans-serif; font-size: 2.5rem; text-transform: uppercase; line-height: 1; margin: 0; }
-        .subtitle { color: #666; margin-top: 10px; font-weight: bold; }
+        header { padding: 30px 20px 10px; text-align: center; max-width: 600px; }
+        h1 { font-family: 'Archivo Black', sans-serif; font-size: 2rem; text-transform: uppercase; line-height: 1; margin: 0; }
+        .subtitle { color: #666; margin-top: 10px; font-weight: bold; font-size: 0.8rem; }
 
         /* --- BATTLE ARENA --- */
         #arena {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 90%;
+            width: 85%; /* Squeezed in from the edges */
             max-width: 800px;
-            margin: 20px 0;
-            padding: 30px;
+            margin: 15px 0;
+            padding: 20px;
             background: #fff;
             border: 4px solid #111;
-            box-shadow: 12px 12px 0 #111;
-            min-height: 250px; /* Made slightly taller for names */
+            box-shadow: 8px 8px 0 #111;
+            min-height: 180px; /* Made shorter */
             position: relative;
+        }
+
+        /* MOBILE LAYOUT ADJUSTMENT */
+        @media (max-width: 600px) {
+            #arena {
+                flex-direction: column; /* Stack vertically */
+                padding: 15px; /* Less padding */
+                gap: 10px; /* Closer together */
+                width: 80%; /* Even smaller on phone to prevent edge touching */
+            }
+            .fighter { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+            #result-area { width: 100%; margin: 5px 0; border-top: 2px dashed #ccc; border-bottom: 2px dashed #ccc; padding: 5px 0; }
+            
+            /* Smaller Emojis for Mobile */
+            .emoji-display { font-size: 3.5rem; } 
+            
+            /* Tighter Text */
+            #outcome-text { font-size: 1.4rem; }
         }
 
         .fighter { 
             text-align: center; 
-            width: 30%; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex: 1;
         }
         
-        /* NEW: Name Tags above emojis */
         .name-tag {
             font-family: 'Archivo Black', sans-serif;
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             color: #111;
             text-transform: uppercase;
-            margin-bottom: 10px;
-            min-height: 30px; /* Keeps layout stable */
+            margin-bottom: 5px;
+            min-height: 20px;
         }
 
-        .emoji-display { font-size: 5rem; display: block; margin-bottom: 10px; transition: transform 0.2s; }
+        .emoji-display { 
+            font-size: 5rem; 
+            display: block; 
+            margin-bottom: 5px; 
+            transition: transform 0.2s;
+            /* Force Color and Font for Visibility */
+            color: #000; 
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
         
-        .fighter-label { 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            font-size: 1rem; 
-            background: black; 
-            color: white; 
-            display: inline-block; 
-            padding: 2px 8px; 
-            margin-top: 5px;
-        }
-
-        /* VS / RESULT AREA */
-        #result-area { width: 40%; text-align: center; }
-        #outcome-text { font-family: 'Archivo Black', sans-serif; font-size: 1.8rem; color: #111; margin-bottom: 10px; line-height: 1; }
-        #reason-text { font-size: 1rem; color: #555; min-height: 40px; line-height: 1.4; font-weight: bold; text-transform: uppercase; }
+        /* RESULT AREA */
+        #result-area { flex: 1.5; text-align: center; padding: 0 10px; }
+        #outcome-text { font-family: 'Archivo Black', sans-serif; font-size: 1.6rem; color: #111; margin-bottom: 5px; line-height: 1; }
+        #reason-text { font-size: 0.8rem; color: #555; min-height: 35px; line-height: 1.3; font-weight: bold; text-transform: uppercase; }
 
         /* --- THE GRID --- */
         #grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
-            gap: 15px;
-            width: 95%;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 8px;
+            width: 90%;
             max-width: 900px;
             margin-bottom: 50px;
-            padding: 20px;
+            padding: 10px;
         }
 
         .weapon-btn {
-            background: #fff;
-            border: 3px solid #111;
-            border-radius: 12px;
-            padding: 10px 5px;
-            cursor: pointer;
-            transition: all 0.1s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 4px 4px 0 #ccc;
+            background: #fff; border: 2px solid #111; border-radius: 8px;
+            padding: 8px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center;
+            box-shadow: 3px 3px 0 #ccc; touch-action: manipulation;
         }
-        .weapon-btn:hover {
-            transform: translate(-3px, -3px);
-            box-shadow: 7px 7px 0 #111;
-            background: #ffeb3b;
-        }
-        .weapon-btn:active {
-            transform: translate(0px, 0px);
-            box-shadow: 2px 2px 0 #111;
-        }
+        .weapon-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #111; background: #ffff99; }
         
-        .weapon-icon { font-size: 2.2rem; margin-bottom: 5px; }
-        .weapon-name { font-size: 0.7rem; font-weight: bold; margin-top: 5px; text-transform: uppercase; text-align: center; line-height: 1.1; }
+        .weapon-icon { font-size: 2rem; margin-bottom: 2px; }
+        .weapon-name { font-size: 0.6rem; font-weight: bold; text-transform: uppercase; text-align: center; line-height: 1.1; }
 
         /* ANIMATIONS */
         .shake { animation: shake 0.5s infinite; }
@@ -142,33 +129,34 @@
 <body>
 
     <header>
-        <h1>RPS Chaos</h1>
-        <div class="subtitle">Rock, Paper, Scissors... and 22 other bad ideas.</div>
+        <h1>Rock Paper Scissors</h1>
+        <div class="subtitle">And 22 other bad ideas.</div>
     </header>
 
     <div id="arena">
         <div class="fighter">
-            <div id="p1-name" class="name-tag">???</div>
-            <span id="p1-emoji" class="emoji-display">❔</span>
-            <div class="fighter-label">YOU</div>
+            <div>
+                <div id="p1-name" class="name-tag">YOU</div>
+                <span id="p1-emoji" class="emoji-display">❔</span>
+            </div>
         </div>
 
         <div id="result-area">
             <div id="outcome-text">CHOOSE</div>
-            <div id="reason-text">Select an item below to fight.</div>
+            <div id="reason-text">Select an item below.</div>
         </div>
 
         <div class="fighter">
-            <div id="cpu-name" class="name-tag">???</div>
-            <span id="cpu-emoji" class="emoji-display">❔</span>
-            <div class="fighter-label">CPU</div>
+            <div>
+                <div id="cpu-name" class="name-tag">CPU</div>
+                <span id="cpu-emoji" class="emoji-display">❔</span>
+            </div>
         </div>
     </div>
 
     <div id="grid"></div>
 
     <script src="outcomes.js"></script>
-
     <script>
         const items = {
             "rock": "🪨", "paper": "📄", "scissors": "✂️", "water": "💧", "fire": "🔥",
@@ -181,7 +169,7 @@
         const keys = Object.keys(items);
         const grid = document.getElementById('grid');
 
-        // --- BUILD GRID ---
+        // Build Grid
         keys.forEach(k => {
             const btn = document.createElement('div');
             btn.className = 'weapon-btn';
@@ -190,71 +178,59 @@
             grid.appendChild(btn);
         });
 
-        // --- GAME LOGIC ---
         function startRound(playerChoice) {
             const p1Emoji = document.getElementById('p1-emoji');
             const cpuEmoji = document.getElementById('cpu-emoji');
-            const p1Name = document.getElementById('p1-name');
-            const cpuName = document.getElementById('cpu-name');
             const display = document.getElementById('outcome-text');
             const reason = document.getElementById('reason-text');
 
-            // 1. Reset Visuals
-            p1Name.innerText = playerChoice.toUpperCase();
-            cpuName.innerText = "???";
+            // Reset Animation
             p1Emoji.innerText = "🤜"; 
             cpuEmoji.innerText = "🤛";
             p1Emoji.className = 'emoji-display shake';
             cpuEmoji.className = 'emoji-display shake';
-            display.innerText = "FIGHTING...";
-            reason.innerText = "";
+            display.innerText = "VS";
+            reason.innerText = "...";
 
-            // 2. Wait 800ms
             setTimeout(() => {
-                finishRound(playerChoice, p1Emoji, cpuEmoji, p1Name, cpuName, display, reason);
-            }, 800);
+                finishRound(playerChoice, p1Emoji, cpuEmoji, display, reason);
+            }, 600);
         }
 
-        function finishRound(playerChoice, p1Emoji, cpuEmoji, p1Name, cpuName, display, reason) {
-            // 1. CPU Picks
+        function finishRound(playerChoice, p1Emoji, cpuEmoji, display, reason) {
             const cpuChoice = keys[Math.floor(Math.random() * keys.length)];
 
-            // 2. Reveal CPU
             p1Emoji.className = 'emoji-display';
             cpuEmoji.className = 'emoji-display';
             p1Emoji.innerText = items[playerChoice];
             cpuEmoji.innerText = items[cpuChoice];
-            p1Name.innerText = playerChoice.toUpperCase();
-            cpuName.innerText = cpuChoice.toUpperCase();
+            
+            document.getElementById('p1-name').innerText = playerChoice;
+            document.getElementById('cpu-name').innerText = cpuChoice;
 
-            // 3. CHECK LOGIC
             if (playerChoice === cpuChoice) {
                 display.innerText = "DRAW";
                 display.style.color = "#111";
-                reason.innerText = `TWO ${playerChoice.toUpperCase()}S DO NOTHING`;
+                reason.innerText = "Nothing happens.";
                 return;
             }
 
-            // Lookup Interaction (Force lowercase to prevent stalling)
             let p1 = playerChoice.toLowerCase();
             let p2 = cpuChoice.toLowerCase();
             let key1 = `${p1}_${p2}`;
             let key2 = `${p2}_${p1}`;
             
-            // Check outcomes.js
             let data = outcomes[key1] || outcomes[key2];
 
             if (!data) {
                 display.innerText = "DRAW";
-                reason.innerText = "LOGIC MISSING (UPDATE OUTCOMES.JS)";
+                reason.innerText = "Logic missing.";
                 return;
             }
 
-            // 4. CONSTRUCT SENTENCE
             let [winner, verb] = data.split('|');
             let loser = (winner === p1) ? p2 : p1;
             
-            // Sentence Construction: "ROCK" + "CRUSHES" + "SCISSORS"
             let fullSentence = `${winner.toUpperCase()} ${verb.toUpperCase()} ${loser.toUpperCase()}`;
 
             if (winner === p1) {
