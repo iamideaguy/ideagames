@@ -6,7 +6,6 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-E4PJR6D8CJ');
     </script>
     <meta charset="UTF-8">
@@ -17,10 +16,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
     <style>
-        /* --- 1. GLOBAL VARIABLES --- */
         :root {
             --bg-color: #fbf9f1;
-            --border-color: #000000;
             --accent-yellow: #ffeb3b;
             --accent-red: #ff4d4d;
             --accent-blue: #2196f3;
@@ -35,13 +32,14 @@
             overflow-x: hidden;
         }
 
-        /* --- HERO SECTION (BIG TEXT) --- */
+        /* --- HERO SECTION --- */
         .hero {
             text-align: center;
             padding: 80px 20px 40px;
             position: relative;
             border-bottom: 3px solid black;
             background: white;
+            overflow: hidden; /* Keeps floating badges contained */
         }
         
         h1 {
@@ -54,7 +52,6 @@
             z-index: 2;
         }
 
-        /* The Yellow Highlight Box */
         .highlight {
             background-color: var(--accent-yellow);
             border: 3px solid black;
@@ -70,7 +67,7 @@
             line-height: 1.5;
         }
 
-        /* --- FLOATING BADGES (ANIMATION) --- */
+        /* --- FLOATING BADGES --- */
         .badge-float {
             position: absolute;
             font-family: 'Space Mono', monospace;
@@ -81,6 +78,7 @@
             text-transform: uppercase;
             box-shadow: 3px 3px 0px black;
             z-index: 1;
+            display: block !important; /* Force show on mobile */
         }
         @keyframes float {
             0% { transform: translateY(0px) rotate(0deg); }
@@ -92,7 +90,7 @@
         .b2 { top: 80px; right: 15%; background: var(--accent-blue); color: white; animation: float 5s ease-in-out infinite; animation-delay: 1s; }
         .b3 { bottom: 20px; left: 20%; background: var(--accent-green); animation: float 3.5s ease-in-out infinite; animation-delay: 0.5s; }
 
-        /* --- GAME GRID (GALLERY STYLE) --- */
+        /* --- GAME GRID --- */
         .grid-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -102,82 +100,64 @@
             gap: 30px;
         }
 
-        /* THE CARD (UPDATED) */
+        /* THE CARD */
         .game-card {
             border: 3px solid black;
-            /* Flex center to put text in middle */
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            
-            height: 250px; /* Fixed height for gallery look */
-            padding: 20px;
-            
+            height: 250px; 
+            padding: 0; /* REMOVED PADDING so image touches edges */
             box-shadow: 8px 8px 0px black;
             transition: transform 0.2s, box-shadow 0.2s;
             text-decoration: none;
             color: black;
             position: relative;
+            background: #fff;
+            overflow: hidden; /* Ensures image doesn't spill out */
             
-            /* Typography for the Card Name */
             font-family: 'Archivo Black', sans-serif;
             font-size: 2rem;
             text-transform: uppercase;
             line-height: 1.1;
         }
 
-        .game-card:hover {
-            transform: translate(-4px, -4px);
-            box-shadow: 12px 12px 0px black;
-            z-index: 10;
+        .game-card:hover { transform: translate(-4px, -4px); box-shadow: 12px 12px 0px black; z-index: 10; }
+        .game-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Zooms image to fill box perfectly */
         }
 
-        /* New Badge */
         .card-badge {
             position: absolute;
-            top: -15px;
-            right: -10px;
+            top: 10px;
+            right: 10px;
             background: black;
             color: white;
-            border: 2px solid black;
+            border: 2px solid white;
             padding: 5px 10px;
             font-family: 'Space Mono', monospace;
             font-weight: bold;
             font-size: 0.8rem;
             transform: rotate(5deg);
+            z-index: 5;
         }
 
-        /* --- FOOTER --- */
-        footer {
-            border-top: 3px solid black;
-            padding: 40px;
-            text-align: center;
-            background: white;
-            margin-top: 50px;
-        }
-        .coffee-btn {
-            background: var(--accent-yellow);
-            border: 3px solid black;
-            padding: 15px 30px;
-            font-weight: bold;
-            text-transform: uppercase;
-            text-decoration: none;
-            color: black;
-            box-shadow: 5px 5px 0px black;
-            display: inline-block;
-            transition: 0.2s;
-        }
+        /* FOOTER */
+        footer { border-top: 3px solid black; padding: 40px; text-align: center; background: white; margin-top: 50px; }
+        .coffee-btn { background: var(--accent-yellow); border: 3px solid black; padding: 15px 30px; font-weight: bold; text-transform: uppercase; text-decoration: none; color: black; box-shadow: 5px 5px 0px black; display: inline-block; transition: 0.2s; }
         .coffee-btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0px black; }
 
         @media (max-width: 768px) {
-    h1 { font-size: 3.5rem; }
-    /* We keep them visible, but make them smaller so they fit */
-    .badge-float { transform: scale(0.7); } 
-    .b1 { top: 20px; left: 5%; }
-    .b2 { top: 60px; right: 5%; }
-    .b3 { bottom: 10px; left: 10%; }
-}
+            h1 { font-size: 3.5rem; }
+            /* Mobile adjustment for badges */
+            .badge-float { transform: scale(0.8); }
+            .b1 { top: 20px; left: 5%; }
+            .b2 { top: 60px; right: 5%; }
+            .b3 { bottom: 10px; left: 10%; }
+        }
     </style>
 </head>
 <body>
@@ -210,7 +190,7 @@
         </a>
 
         <a href="rps-chaos/index.html" class="game-card">
-            <img src="rps-chaos/thumb.jpg" style="width:100%; height:100%; object-fit:cover;" alt="RPS Chaos">
+            <img src="rps-chaos/thumb.jpg" alt="Rock Paper Scissors">
         </a>
 
         <a href="tax-calculator/index.html" class="game-card" style="background-color: #84fab0;">
@@ -232,7 +212,7 @@
         <br><br>
         <div>
             <strong>@iamideaguy</strong> • Satirical Mini Games 🎮👾<br>
-            <a href="privacy.html" style="color:#000; font-size: 0.8rem;">Privac Policy</a>
+            <a href="privacy.html" style="color:#000; font-size: 0.8rem;">Privacy</a>
         </div>
     </footer>
 
