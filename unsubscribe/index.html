@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Unsubscribe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- GMAIL VIBE CSS --- */
+        body {
+            background-color: #f6f8fc;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #202124;
+            overflow: hidden;
+            user-select: none; /* Prevents text highlighting cheats */
+        }
+
+        #email-client {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 85vh;
+            position: relative;
+        }
+
+        /* Header */
+        #top-bar {
+            background: #f1f3f4;
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #5f6368;
+            font-size: 14px;
+        }
+        .fake-search {
+            background: white;
+            border-radius: 4px;
+            padding: 8px;
+            flex-grow: 1;
+            color: #999;
+        }
+
+        /* Content */
+        #email-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-y: auto; /* Allow scrolling inside email */
+        }
+
+        #subject-line { font-size: 18px; margin-bottom: 15px; font-weight: 400; }
+        
+        #sender-info { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; }
+        
+        .avatar {
+            width: 40px; height: 40px;
+            background-color: #5f6368; /* Gmail Blue-Grey */
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        .sender-details { display: flex; flex-direction: column; font-size: 13px; }
+        .sender-name { font-weight: 700; color: #202124; }
+        .sender-email { color: #5f6368; font-size: 11px; }
+
+        #marketing-body { font-size: 14px; line-height: 1.5; color: #202124; flex-grow: 1; }
+
+        #email-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 11px;
+            color: #999;
+            text-align: center;
+            position: relative;
+            min-height: 60px;
+        }
+
+        /* --- THE LINK --- */
+        .unsubscribe-link {
+            color: #1a73e8;
+            text-decoration: underline;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        /* --- UI ELEMENTS --- */
+        #level-badge {
+            background: #202124; color: white;
+            padding: 4px 10px; border-radius: 12px;
+            font-size: 10px; font-weight: bold;
+        }
+
+        #overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            z-index: 100; display: none; text-align: center;
+        }
+        
+        .next-btn {
+            background: #1a73e8; color: white;
+            padding: 12px 30px; border-radius: 4px;
+            border: none; font-size: 16px; cursor: pointer;
+            margin-top: 20px; font-weight: bold;
+        }
+
+        /* --- LEVEL SPECIFIC STYLES --- */
+        .fake-btn {
+            background: #4caf50; color: white; padding: 10px 20px;
+            border-radius: 4px; text-decoration: none; font-weight: bold;
+            margin-bottom: 10px; display: inline-block; cursor: pointer;
+        }
+        
+        .scramble-char { position: absolute; font-weight: bold; padding: 10px; }
+        
+        .notification-badge {
+            position: absolute; top: -10px; right: -15px;
+            background: red; color: white; border-radius: 50%;
+            width: 25px; height: 25px; display: flex;
+            justify-content: center; align-items: center;
+            font-size: 10px; font-weight: bold; border: 2px solid white;
+            z-index: 10; cursor: pointer;
+        }
+
+        /* Matrix Effect */
+        .matrix-bg { background: black !important; color: #00ff00 !important; }
+        .matrix-text { font-family: monospace; }
+        
+        /* Printer Effect */
+        @keyframes print { from { height: 0; } to { height: 100%; } }
+
+    </style>
+</head>
+<body>
+
+    <div id="email-client">
+        <div id="top-bar">
+            <div style="font-weight:bold; color:#d93025; font-size: 18px;">M</div>
+            <div class="fake-search">Search mail</div>
+            <div id="level-badge">LVL 1</div>
+        </div>
+
+        <div id="email-content">
+            <div id="subject-line">Subject</div>
+            <div id="sender-info">
+                <div class="avatar">M</div>
+                <div class="sender-details">
+                    <span class="sender-name">MegaCorp</span>
+                    <span class="sender-email">noreply@megacorp.com</span>
+                </div>
+            </div>
+            <div id="marketing-body">Body</div>
+            <div id="email-footer"></div>
+        </div>
+
+        <div id="overlay">
+            <h1 id="win-title">Unsubscribed!</h1>
+            <p id="win-desc">That was easy.</p>
+            <button class="next-btn" onclick="nextLevel()">Next Email</button>
+        </div>
+    </div>
+
+    <script>
+        let currentLevel = 0;
+        const saved = localStorage.getItem('unsubLevel');
+        if (saved) currentLevel = parseInt(saved);
+
+        // --- DOM ---
+        const els = {
+            subject: document.getElementById('subject-line'),
+            body: document.getElementById('marketing-body'),
+            footer: document.getElementById('email-footer'),
+            badge: document.getElementById('level-badge'),
+            overlay: document.getElementById('overlay'),
+            client: document.getElementById('email-client'),
+            avatar: document.querySelector('.avatar')
+        };
+
+        // --- HELPERS ---
+        const win = () => {
+            els.overlay.style.display = "flex";
+            localStorage.setItem('unsubLevel', currentLevel + 1);
+        };
+
+        const createLink = (text, onClick = win) => {
+            const a = document.createElement('a');
+            a.innerText = text;
+            a.className = "unsubscribe-link";
+            a.onclick = onClick;
+            els.footer.appendChild(a);
+            return a;
+        };
+
+        // --- 40 LEVELS ---
+        const levels = [
+            // --- PHASE 1: VISUAL (1-10) ---
+            { 
+                s: "Welcome to the family", 
+                b: "We are so happy to have you. You can never leave.", 
+                run: () => createLink("Unsubscribe") 
+            },
+            { 
+                s: "Just checking in", 
+                b: "It's been 5 minutes. We miss you.", 
+                run: () => { 
+                    const l = createLink("Unsubscribe"); 
+                    l.style.color = "#eee"; l.style.fontSize = "10px"; 
+                } 
+            },
+            { 
+                s: "Special Offer", 
+                b: "Premium invisible products.", 
+                run: () => { 
+                    const l = createLink("Unsubscribe"); 
+                    l.style.color = "white"; l.style.textDecoration = "none"; 
+                } 
+            },
+            { 
+                s: "Don't go", 
+                b: "Please check your spelling.", 
+                run: () => { 
+                    ["Unsubsrcibe", "Unsubscibe", "Unsuscribe"].forEach(t => {
+                        const l = createLink(t, () => alert("404: Link Not Found"));
+                        l.style.margin = "0 5px";
+                    });
+                    createLink("Unsubscribe").style.margin = "0 5px";
+                } 
+            },
+            { 
+                s: "Catch me if you can", 
+                b: "Our lawyer is very fast.", 
+                run: () => { 
+                    const l = createLink("Unsubscribe"); 
+                    l.style.position = "relative"; 
+                    setInterval(() => {
+                        l.style.left = Math.random() * 200 - 100 + "px";
+                        l.style.top = Math.random() * 20 - 10 + "px";
+                    }, 600);
+                } 
+            },
+            { 
+                s: "Micro-Management", 
+                b: "We are downsizing.", 
+                run: () => { 
+                    const l = createLink("."); 
+                    l.style.fontSize = "30px"; l.style.textDecoration = "none"; 
+                } 
+            },
+            { 
+                s: "Stay with us", 
+                b: "Click the big green button.", 
+                run: () => { 
+                    const btn = document.createElement('div');
+                    btn.className = 'fake-btn';
+                    btn.innerText = "KEEP SUBSCRIBED";
+                    btn.onclick = () => alert("Thank you for staying!");
+                    els.footer.appendChild(btn);
+                    const l = createLink("Unsubscribe");
+                    l.style.display = "block"; l.style.fontSize = "9px"; l.style.opacity = "0.3";
+                } 
+            },
+            { 
+                s: "Chameleon Mode", 
+                b: "We blend in.", 
+                run: () => { 
+                    const l = createLink("Unsubscribe");
+                    l.style.textDecoration = "none";
+                    setInterval(() => {
+                        const c = `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`;
+                        els.footer.style.backgroundColor = c;
+                        l.style.color = c;
+                        setTimeout(() => l.style.color = "white", 800);
+                    }, 1000);
+                } 
+            },
+            { 
+                s: "Scrambled", 
+                b: "Pick up the pieces.", 
+                run: () => { 
+                    let clicks = 0;
+                    "UNSUBSCRIBE".split('').forEach(char => {
+                        const s = document.createElement('span');
+                        s.innerText = char;
+                        s.className = "scramble-char";
+                        s.style.color = "blue";
+                        s.style.left = Math.random() * 80 + "%";
+                        s.style.top = Math.random() * 80 + "%";
+                        s.onclick = () => {
+                            s.style.display = 'none';
+                            clicks++;
+                            if(clicks === 11) win();
+                        };
+                        els.footer.appendChild(s);
+                    });
+                } 
+            },
+            { 
+                s: "Russian Doll", 
+                b: "Email inside an email.", 
+                run: () => { 
+                    const l = createLink("Unsubscribe", () => {
+                        els.body.innerHTML = `<div style='border:1px solid #ccc; padding:20px; border-radius:4px;'><h3>Re: Russian Doll</h3><p>Are you sure?</p><div id='inner-footer' style='margin-top:20px;'></div></div>`;
+                        const inner = document.createElement('a');
+                        inner.className = 'unsubscribe-link';
+                        inner.innerText = "Unsubscribe";
+                        inner.onclick = win;
+                        document.getElementById('inner-footer').appendChild(inner);
+                    });
+                } 
+            },
+
+            // --- PHASE 2: PHYSICAL (11-20) ---
+            { 
+                s: "Heavy Metal", 
+                b: "This link is very heavy.", 
+                run: () => { 
+                    const l = createLink("Unsubscribe");
+                    l.style.position = "absolute";
+                    l.style.top = "0px";
+                    let pos = 0;
+                    let vel = 0;
+                    // Gravity Logic
+                    setInterval(() => {
+                        vel += 1;
+                        pos += vel;
+                        if(pos > 50) { pos = 50; vel = -vel * 0.8; } // Bounce
+                        l.style.top = pos + "px";
+                    }, 20);
+                } 
+            },
+            {
+                s: "Windy Day",
+                b: "Hard to click in this weather.",
+                run: () => {
+                    const l = createLink("Unsubscribe");
+                    l.style.position = "relative";
+                    l.style.transition = "left 0.2s";
+                    els.client.addEventListener('mousemove', (e) => {
+                        // If mouse is on left side, blow link right
+                        const rect = els.footer.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        if(x < rect.width / 2) l.style.left = "50px";
+                        else l.style.left = "-50px";
+                    });
+                }
+            },
+            {
+                s: "Click Harder",
+                b: "The link is frozen.",
+                run: () => {
+                    const l = createLink("Unsubscribe (5)");
+                    let hp = 5;
+                    l.onclick = () => {
+                        hp--;
+                        l.innerText = `Unsubscribe (${hp})`;
+                        l.style.opacity = hp / 5;
+                        if(hp <= 0) win();
+                    }
+                }
+            },
+            {
+                s: "Orbit",
+                b: "Round and round we go.",
+                run: () => {
+                    const l = createLink("Unsubscribe");
+                    l.style.position = "absolute";
+                    let angle = 0;
+                    setInterval(() => {
+                        angle += 0.05;
+                        l.style.left = (50 + Math.cos(angle) * 40) + "%";
+                        l.style.top = (20 + Math.sin(angle) * 20) + "px";
+                    }, 16);
+                }
+            },
+            {
+                s: "Dark Mode",
+                b: "Who turned out the lights?",
+                run: () => {
+                    createLink("Unsubscribe");
+                    const cover = document.createElement('div');
+                    cover.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; background:black; pointer-events:none; z-index:10;";
+                    // Flashlight hole
+                    els.client.appendChild(cover);
+                    els.client.onmousemove = (e) => {
+                        const rect = els.client.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        cover.style.background = `radial-gradient(circle at ${x}px ${y}px, transparent 50px, black 100px)`;
+                    };
+                    // Touch support
+                    els.client.ontouchmove = (e) => {
+                         const rect = els.client.getBoundingClientRect();
+                         const x = e.touches[0].clientX - rect.left;
+                         const y = e.touches[0].clientY - rect.top;
+                         cover.style.background = `radial-gradient(circle at ${x}px ${y}px, transparent 50px, black 100px)`;
+                    }
+                }
+            },
+            {
+                s: "Mirror World",
+                b: "Everything is backwards.",
+                run: () => {
+                    els.client.style.transform = "scaleX(-1)";
+                    createLink("Unsubscribe");
+                }
+            },
+            {
+                s: "Glitch in the Matrix",
+                b: "Connection unstable.",
+                run: () => {
+                    const l = createLink("Unsubscribe");
+                    setInterval(() => {
+                        if(Math.random() > 0.7) l.style.display = 'none';
+                        else l.style.display = 'inline';
+                    }, 100);
+                }
+            },
+            {
+                s: "Slider",
+                b: "Unlock to leave.",
+                run: () => {
+                    const range = document.createElement('input');
+                    range.type = "range";
+                    range.min = 0; range.max = 100; range.value = 0;
+                    range.style.width = "200px";
+                    range.oninput = () => {
+                        if(range.value == 100) win();
+                    };
+                    els.footer.appendChild(range);
+                    const label = document.createElement('div');
+                    label.innerText = "Slide to Unsubscribe";
+                    els.footer.appendChild(label);
+                }
+            },
+            {
+                s: "Breakup",
+                b: "It's not you, it's us.",
+                run: () => {
+                    const l = createLink("Unsubscribe");
+                    l.onclick = () => {
+                        l.innerText = "Un   sub   scr   ibe";
+                        l.style.wordSpacing = "20px";
+                        l.onclick = () => {
+                            l.innerHTML = "Un <br> sub <br> scribe";
+                            l.onclick = win;
+                        }
+                    }
+                }
+            },
+            {
+                s: "Hold Tight",
+                b: "Press and hold to confirm.",
+                run: () => {
+                    const l = createLink("Hold to Unsubscribe");
+                    let timer;
+                    const start = () => {
+                        l.style.color = "red";
+                        timer = setTimeout(win, 2000);
+                    };
+                    const end = () => {
+                        l.style.color = "#1a73e8";
+                        clearTimeout(timer);
+                    };
+                    l.onmousedown = start; l.onmouseup = end;
+                    l.ontouchstart = start; l.ontouchend = end;
+                    l.onclick = null; // Disable default click
+                }
+            },
+
+            // --- PHASE 3: LOGIC (21-30) ---
+            {
+                s: "Double Negative",
+                b: "Select the correct option.",
+                run: () => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <label><input type='checkbox' id='c1'> I do NOT want to stop receiving emails.</label><br>
+                        <label><input type='checkbox' id='c2'> I want to NOT unsubscribe.</label><br>
+                        <button id='sub-btn'>Submit</button>
+                    `;
+                    els.footer.appendChild(div);
+                    document.getElementById('sub-btn').onclick = () => {
+                        const c1 = document.getElementById('c1').checked;
+                        const c2 = document.getElementById('c2').checked;
+                        if(!c1 && !c2) win(); // Checking nothing is the logical "Unsubscribe"
+                        else alert("Preference Saved: You are still subscribed.");
+                    }
+                }
+            },
+            {
+                s: "Password Required",
+                b: "Enter your password to leave.",
+                run: () => {
+                    const input = document.createElement('input');
+                    input.placeholder = "Password";
+                    const btn = document.createElement('button');
+                    btn.innerText = "Unsubscribe";
+                    btn.onclick = () => {
+                        if(input.value.length > 0) win();
+                        else alert("Password cannot be empty");
+                    };
+                    els.footer.append(input, btn);
+                }
+            },
+            {
+                s: "Terms of Service",
+                b: "Please read before leaving.",
+                run: () => {
+                    const box = document.createElement('div');
+                    box.style.cssText = "height:100px; overflow-y:scroll; border:1px solid #ccc; font-size:10px; margin-bottom:10px;";
+                    box.innerHTML = "Blah blah blah ".repeat(500) + "<br><br><a id='real-link' style='color:blue; cursor:pointer;'>Unsubscribe</a>";
+                    els.footer.appendChild(box);
+                    setTimeout(() => {
+                        document.getElementById('real-link').onclick = win;
+                    }, 500);
+                }
+            },
+            {
+                s: "Are you sure?",
+                b: "Really sure?",
+                run: () => {
+                    let clicks = 0;
+                    const l = createLink("Unsubscribe", () => {
+                        clicks++;
+                        const texts = ["Are you sure?", "Really?", "Think about the children", "Final chance", "Okay fine"];
+                        if(clicks < 5) alert(texts[clicks-1]);
+                        else win();
+                    });
+                }
+            },
+            {
+                s: "Notification",
+                b: "Clear your inbox first.",
+                run: () => {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = "relative";
+                    wrapper.style.display = "inline-block";
+                    
+                    const l = document.createElement('a');
+                    l.innerText = "Unsubscribe";
+                    l.className = "unsubscribe-link";
+                    
+                    const badge = document.createElement('div');
+                    badge.className = "notification-badge";
+                    badge.innerText = "10";
+                    let count = 10;
+                    
+                    badge.onclick = () => {
+                        count--;
+                        badge.innerText = count;
+                        if(count === 0) {
+                            badge.style.display = 'none';
+                            l.onclick = win;
+                        }
+                    };
+                    
+                    wrapper.append(l, badge);
+                    els.footer.appendChild(wrapper);
+                }
+            },
+            {
+                s: "Quick Math",
+                b: "Verify you are human.",
+                run: () => {
+                    const q = document.createElement('div');
+                    q.innerHTML = "Calculate: 5 x 5 - 20 = <input id='math-ans' style='width:30px'>";
+                    const btn = document.createElement('button');
+                    btn.innerText = "Confirm";
+                    btn.onclick = () => {
+                        if(document.getElementById('math-ans').value == '5') win();
+                        else alert("Wrong.");
+                    }
+                    els.footer.append(q, btn);
+                }
+            },
+            {
+                s: "Loading...",
+                b: "Processing your request.",
+                run: () => {
+                    const bar = document.createElement('div');
+                    bar.style.cssText = "width:100%; height:10px; background:#eee; margin-bottom:10px;";
+                    const fill = document.createElement('div');
+                    fill.style.cssText = "width:0%; height:100%; background:blue; transition:width 0.2s;";
+                    bar.appendChild(fill);
+                    els.footer.appendChild(bar);
+                    
+                    // Shake to charge
+                    let charge = 0;
+                    els.client.addEventListener('mousemove', () => {
+                        charge += 1;
+                        if(charge > 100) charge = 100;
+                        fill.style.width = charge + "%";
+                        if(charge === 100) createLink("Complete", win);
+                    });
+                     // Mobile Tap to charge
+                    els.client.addEventListener('touchstart', () => {
+                         charge += 5;
+                         if(charge > 100) charge = 100;
+                         fill.style.width = charge + "%";
+                         if(charge === 100 && !document.querySelector('.unsubscribe-link')) createLink("Complete", win);
+                    });
+                }
+            },
+            {
+                s: "Toggles",
+                b: "Turn everything OFF to leave.",
+                run: () => {
+                    const container = document.createElement('div');
+                    let states = [true, true, true, true];
+                    const render = () => {
+                        container.innerHTML = "";
+                        states.forEach((s, i) => {
+                            const t = document.createElement('input');
+                            t.type = "checkbox";
+                            t.checked = s;
+                            t.onclick = () => {
+                                states[i] = !states[i];
+                                // Annoying logic: Toggling one affects neighbor
+                                if(i < 3) states[i+1] = !states[i+1];
+                                render();
+                                if(states.every(x => !x)) win();
+                            };
+                            container.appendChild(t);
+                        });
+                    };
+                    render();
+                    els.footer.appendChild(container);
+                }
+            },
+            {
+                s: "Popups",
+                b: "Close the ads to continue.",
+                run: () => {
+                    const l = createLink("Unsubscribe", win);
+                    l.style.zIndex = 1;
+                    
+                    for(let i=0; i<3; i++) {
+                        const p = document.createElement('div');
+                        p.style.cssText = `position:absolute; width:150px; height:100px; background:white; border:1px solid black; top:${-50 + i*20}px; left:${i*20}px; z-index:10; padding:10px; box-shadow:0 5px 10px rgba(0,0,0,0.2);`;
+                        p.innerHTML = "<b>BUY NOW!</b><br><br><button onclick='this.parentElement.remove()'>X</button>";
+                        els.footer.appendChild(p);
+                    }
+                }
+            },
+            {
+                s: "Captcha",
+                b: "Select the sad CEO.",
+                run: () => {
+                    const faces = ["🙂", "😎", "🤠", "😢", "😆"];
+                    faces.forEach(f => {
+                        const s = document.createElement('span');
+                        s.innerText = f;
+                        s.style.fontSize = "30px";
+                        s.style.cursor = "pointer";
+                        s.style.margin = "5px";
+                        s.onclick = () => {
+                            if(f === "😢") win();
+                            else alert("He looks happy to me.");
+                        };
+                        els.footer.appendChild(s);
+                    });
+                }
+            },
+
+            // --- PHASE 4: ABSURD (31-40) ---
+            {
+                s: "Printing...",
+                b: "Please wait.",
+                run: () => {
+                    els.body.style.height = "0px";
+                    els.body.style.overflow = "hidden";
+                    els.body.style.transition = "height 5s linear";
+                    setTimeout(() => els.body.style.height = "200px", 100);
+                    setTimeout(() => createLink("Unsubscribe"), 5000);
+                }
+            },
+            {
+                s: "Shredder",
+                b: "Be quick!",
+                run: () => {
+                    const l = createLink("Unsubscribe");
+                    setTimeout(() => {
+                        l.style.transition = "opacity 2s";
+                        l.style.opacity = 0;
+                        setTimeout(() => {
+                            l.remove();
+                            alert("Too slow!");
+                            location.reload();
+                        }, 2000);
+                    }, 500);
+                }
+            },
+            {
+                s: "DVD Logo",
+                b: "Hit the corner.",
+                run: () => {
+                    const l = createLink("DVD");
+                    l.style.position = "absolute";
+                    l.style.background = "black";
+                    l.style.color = "white";
+                    l.style.padding = "5px";
+                    let x = 0, y = 0, dx = 2, dy = 2;
+                    setInterval(() => {
+                        x += dx; y += dy;
+                        if(x > 250 || x < 0) dx = -dx;
+                        if(y > 50 || y < 0) dy = -dy;
+                        l.style.left = x + "px";
+                        l.style.top = y + "px";
+                    }, 20);
+                }
+            },
+            {
+                s: "The Matrix",
+                b: "Follow the white rabbit.",
+                run: () => {
+                    els.client.classList.add('matrix-bg');
+                    els.body.innerHTML = "";
+                    for(let i=0; i<100; i++) {
+                        const s = document.createElement('span');
+                        s.innerText = Math.random() > 0.5 ? "1" : "0";
+                        s.className = "matrix-text";
+                        els.body.appendChild(s);
+                    }
+                    const l = createLink("0");
+                    l.style.color = "#00ff00";
+                    l.style.textDecoration = "none";
+                    l.onclick = () => {
+                        els.client.classList.remove('matrix-bg');
+                        win();
+                    }
+                }
+            },
+            {
+                s: "404 Error",
+                b: "Page not found.",
+                run: () => {
+                    els.body.innerHTML = "<h1>404</h1><p>We couldn't find the page you're looking for.</p>";
+                    const l = document.createElement('span');
+                    l.innerText = ".";
+                    l.onclick = win;
+                    l.style.cursor = "pointer";
+                    els.body.appendChild(l);
+                }
+            },
+            {
+                s: "Clippy",
+                b: "It looks like you're trying to leave.",
+                run: () => {
+                    const c = document.createElement('div');
+                    c.innerHTML = "📎 <b>I can help!</b><br>Don't leave.";
+                    c.style.cssText = "position:absolute; bottom:10px; right:10px; background:#ff9; padding:10px; border:1px solid #000;";
+                    els.client.appendChild(c);
+                    createLink("Unsubscribe").onmouseover = () => {
+                        alert("Clippy says: Are you sure?");
+                    };
+                }
+            },
+            {
+                s: "Low Battery",
+                b: "Please charge to continue.",
+                run: () => {
+                    els.client.style.opacity = "0.2";
+                    const btn = document.createElement('button');
+                    btn.innerText = "Charge";
+                    let charge = 0.2;
+                    btn.onclick = () => {
+                        charge += 0.1;
+                        els.client.style.opacity = charge;
+                        if(charge >= 1) {
+                            btn.remove();
+                            createLink("Unsubscribe");
+                        }
+                    };
+                    els.footer.appendChild(btn);
+                }
+            },
+            {
+                s: "Verification Code",
+                b: "We sent a code to the subject line.",
+                run: () => {
+                    const code = Math.floor(Math.random() * 9000) + 1000;
+                    els.subject.innerText = `Subject: Your code is ${code}`;
+                    const input = document.createElement('input');
+                    input.placeholder = "Code";
+                    const btn = document.createElement('button');
+                    btn.innerText = "Verify";
+                    btn.onclick = () => {
+                        if(input.value == code) win();
+                    }
+                    els.footer.append(input, btn);
+                }
+            },
+            {
+                s: "Boss Fight",
+                b: "Dodge the SUBSCRIBE button.",
+                run: () => {
+                    const boss = document.createElement('button');
+                    boss.innerText = "SUBSCRIBE";
+                    boss.style.cssText = "position:absolute; width:100px; height:50px; background:green; color:white; font-weight:bold; z-index:10;";
+                    els.footer.appendChild(boss);
+                    
+                    const l = createLink("Unsubscribe", win);
+                    
+                    // Boss follows cursor/touch
+                    const moveBoss = (x, y) => {
+                         boss.style.left = (x - 50) + "px";
+                         boss.style.top = (y - 25) + "px";
+                    };
+                    
+                    els.client.addEventListener('mousemove', (e) => {
+                         const rect = els.footer.getBoundingClientRect();
+                         moveBoss(e.clientX - rect.left, e.clientY - rect.top);
+                    });
+                    
+                    // You have to be fast
+                    boss.onclick = () => alert("Subscribed forever!");
+                }
+            },
+            {
+                s: "Freedom",
+                b: "You made it.",
+                run: () => {
+                    const l = createLink("Unsubscribe Forever");
+                    l.style.fontSize = "30px";
+                    l.style.fontWeight = "bold";
+                    l.onclick = () => {
+                        alert("Congratulations! You beat the system.");
+                        localStorage.setItem('unsubLevel', 0);
+                        location.reload();
+                    };
+                }
+            }
+        ];
+
+        // --- ENGINE ---
+        function loadLevel(idx) {
+            els.overlay.style.display = "none";
+            els.footer.innerHTML = "";
+            els.body.innerHTML = "";
+            els.body.style = ""; // Reset styles
+            els.client.style = ""; // Reset transforms
+            els.client.className = ""; // Reset classes
+            
+            // Set Text
+            const l = levels[idx];
+            els.subject.innerText = l.s;
+            els.body.innerText = l.b;
+            els.badge.innerText = `LVL ${idx + 1}`;
+            
+            // Re-clone avatar to clear listeners
+            const newAvatar = els.avatar.cloneNode(true);
+            els.avatar.parentNode.replaceChild(newAvatar, els.avatar);
+            els.avatar = newAvatar;
+
+            l.run();
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            if(currentLevel >= levels.length) currentLevel = 0;
+            loadLevel(currentLevel);
+        }
+
+        // Start
+        loadLevel(currentLevel);
+
+    </script>
+</body>
+</html>
